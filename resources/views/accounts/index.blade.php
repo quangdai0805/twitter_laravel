@@ -25,7 +25,7 @@
                 <button aria-controls="navbar" aria-expanded="false" data-target="#navbar" data-toggle="collapse" class="navbar-toggle collapsed" type="button">
                     <i class="fa fa-reorder"></i>
                 </button>
-                <a href="#" class="navbar-brand">Inspinia</a>
+                <a href="{{ route('main') }}" class="navbar-brand">Home</a>
             </div>
             <div class="navbar-collapse collapse" id="navbar">
                 <ul class="nav navbar-nav">
@@ -94,31 +94,57 @@
                                     <a class="dropdown-toggle" data-toggle="dropdown" href="">
                                         <i class="fa fa-wrench"></i>
                                     </a>
-                                    {{-- <ul class="dropdown-menu dropdown-user">
+                                    <ul class="dropdown-menu dropdown-user">
                                         <li><a href="#">Config option 1</a>
                                         </li>
                                         <li><a href="#">Config option 2</a>
                                         </li>
-                                    </ul> --}}
+                                    </ul>
                                     <a class="">
                                         <i class="fa fa-times"></i>
                                     </a>
                                 </div>
                             </div>
-                            <div class="ibox-content">
-                                <div class="row">
-                                    <div class="col-sm-9 m-b-xs">
-                                        <div data-toggle="buttons" class="btn-group">
-                                            <label class="btn btn-sm btn-white"> <input type="radio" id="option1" name="options"> Day </label>
-                                            <label class="btn btn-sm btn-white active"> <input type="radio" id="option2" name="options"> Week </label>
-                                            <label class="btn btn-sm btn-white"> <input type="radio" id="option3" name="options"> Month </label>
-                                        </div>
-                                    </div>
-                                    <div class="col-sm-3">
-                                        <div class="input-group"><input type="text" placeholder="Search" class="input-sm form-control"> <span class="input-group-btn">
-                                        <button type="button" class="btn btn-sm btn-primary"> Go!</button> </span></div>
+                            
+                            {{-- Start Todo-List --}}
+{{-- 
+                            <div class="ibox float-e-margins">
+                                <div class="ibox-title">
+                                    <h5>Small todo list</h5>
+                                    <div class="ibox-tools">
+                                        <a class="collapse-link">
+                                            <i class="fa fa-chevron-up"></i>
+                                        </a>
+                                        <a class="close-link">
+                                            <i class="fa fa-times"></i>
+                                        </a>
                                     </div>
                                 </div>
+                                <div class="ibox-content">
+                                    <ul class="todo-list m-t small-list">
+                                        <li>
+                                            <a href="#" class="check-link"><i class="fa fa-check-square"></i> </a>
+                                            <span class="m-l-xs todo-completed">Buy a milk</span>
+
+                                        </li>
+                                        <li>
+                                            <a href="#" class="check-link"><i class="fa fa-square-o"></i> </a>
+                                            <span class="m-l-xs">Go to shop and find some products.</span>
+
+                                        </li>
+                                        <li>
+                                            <a href="#" class="check-link"><i class="fa fa-square-o"></i> </a>
+                                            <span class="m-l-xs">Send documents to Mike</span>
+                                            <small class="label label-primary"><i class="fa fa-clock-o"></i> 1 mins</small>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div> 
+                            --}}
+
+                            {{-- End Todo List --}}
+                            <div class="ibox-content">
+                                
                                 <div class="table-responsive">
                                     <form method="POST" action="{{ route('deleteSelected') }}">
                                         @csrf
@@ -159,7 +185,67 @@
 
                                    
                                 </div>
-                               
+
+                                <div class="ibox float-e-margins">
+                                    <div class="ibox-title">
+                                        <h5>Action Accounts</h5>
+                                        <div class="ibox-tools">
+                                            <a class="collapse-link">
+                                                <i class="fa fa-chevron-up"></i>
+                                            </a>
+                                            <a class="close-link">
+                                                <i class="fa fa-times"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                    <div class="ibox-content">
+                                        <ul class="todo-list m-t small-list">
+                                            <li>
+                                                <button type="button" class="btn btn-sm btn-primary"> Login</button> 
+                                            </li>
+                                            <li>
+                                                <div class="input-group col-sm-6">
+                                                    <span class="input-group-btn">
+                                                        <button type="button" class="btn btn-sm btn-primary"> Follow</button> 
+                                                    </span>
+
+                                                    <input type="text" placeholder="UID" class="input-sm form-control">
+                                                </div>
+                                        
+    
+                                            </li>
+                                            <li>
+                                                <div class="input-group col-sm-6">
+                                                    <span class="input-group-btn">
+                                                        <button type="button" class="btn btn-sm btn-primary"> Tweet</button> 
+                                                    </span>
+
+                                                    <input type="text" placeholder="UID" class="input-sm form-control">
+                                                </div>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div> 
+
+
+                                {{-- <div class="row">
+
+                                    <div class="col-sm-9 m-b-xs">
+                                        <div data-toggle="buttons" class="btn-group">
+                                            <label class="btn btn-sm btn-white"> <input type="radio" id="option1" name="options"> Day </label>
+                                            <label class="btn btn-sm btn-white active"> <input type="radio" id="option2" name="options"> Week </label>
+                                            <label class="btn btn-sm btn-white"> <input type="radio" id="option3" name="options"> Month </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <div class="input-group">
+                                            <input type="text" placeholder="Search" class="input-sm form-control">
+                                            <span class="input-group-btn">
+                                                <button type="button" class="btn btn-sm btn-primary"> Go!</button> 
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div> --}}
 
                             </div>
                         </div>
@@ -227,79 +313,6 @@
                 checkbox.checked = this.checked;
             }
         }
-    </script>
-    <script>
-        $(document).ready(function() {
-
-
-            var d1 = [[1262304000000, 6], [1264982400000, 3057], [1267401600000, 20434], [1270080000000, 31982], [1272672000000, 26602], [1275350400000, 27826], [1277942400000, 24302], [1280620800000, 24237], [1283299200000, 21004], [1285891200000, 12144], [1288569600000, 10577], [1291161600000, 10295]];
-            var d2 = [[1262304000000, 5], [1264982400000, 200], [1267401600000, 1605], [1270080000000, 6129], [1272672000000, 11643], [1275350400000, 19055], [1277942400000, 30062], [1280620800000, 39197], [1283299200000, 37000], [1285891200000, 27000], [1288569600000, 21000], [1291161600000, 17000]];
-
-            var data1 = [
-                { label: "Data 1", data: d1, color: '#17a084'},
-                { label: "Data 2", data: d2, color: '#127e68' }
-            ];
-            $.plot($("#flot-chart1"), data1, {
-                xaxis: {
-                    tickDecimals: 0
-                },
-                series: {
-                    lines: {
-                        show: true,
-                        fill: true,
-                        fillColor: {
-                            colors: [{
-                                opacity: 1
-                            }, {
-                                opacity: 1
-                            }]
-                        },
-                    },
-                    points: {
-                        width: 0.1,
-                        show: false
-                    },
-                },
-                grid: {
-                    show: false,
-                    borderWidth: 0
-                },
-                legend: {
-                    show: false,
-                }
-            });
-
-            var lineData = {
-                labels: ["January", "February", "March", "April", "May", "June", "July"],
-                datasets: [
-                    {
-                        label: "Example dataset",
-                        backgroundColor: "rgba(26,179,148,0.5)",
-                        borderColor: "rgba(26,179,148,0.7)",
-                        pointBackgroundColor: "rgba(26,179,148,1)",
-                        pointBorderColor: "#fff",
-                        data: [48, 48, 60, 39, 56, 37, 30]
-                    },
-                    {
-                        label: "Example dataset",
-                        backgroundColor: "rgba(220,220,220,0.5)",
-                        borderColor: "rgba(220,220,220,1)",
-                        pointBackgroundColor: "rgba(220,220,220,1)",
-                        pointBorderColor: "#fff",
-                        data: [65, 59, 40, 51, 36, 25, 40]
-                    }
-                ]
-            };
-
-            var lineOptions = {
-                responsive: true
-            };
-
-
-            var ctx = document.getElementById("lineChart").getContext("2d");
-            new Chart(ctx, {type: 'line', data: lineData, options:lineOptions});
-
-        });
     </script>
 
 </body>

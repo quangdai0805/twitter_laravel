@@ -3,18 +3,9 @@
 <head>
     <title>Main View</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <style>
-        textarea {
-            width: 300px;
-            height: 150px;
-        }
-    </style>
      <link href="css/bootstrap.min.css" rel="stylesheet">
      <link href="font-awesome/css/font-awesome.css" rel="stylesheet">
- 
-     <!-- Toastr style -->
      <link href="css/plugins/toastr/toastr.min.css" rel="stylesheet">
- 
      <link href="css/animate.css" rel="stylesheet">
      <link href="css/style.css" rel="stylesheet">
 </head>
@@ -34,9 +25,6 @@
                 <div class="navbar-collapse collapse" id="navbar">
                     <ul class="nav navbar-nav">
                         <li class="active">
-
-                            {{-- <a href="{{ route('accounts.index') }}" class="btn btn-primary"> --}}
-
                             <a aria-expanded="false" role="button" href="{{ route('accounts.index') }}"> Quản lý Accounts</a>
                         </li>
                         <li class="dropdown">
