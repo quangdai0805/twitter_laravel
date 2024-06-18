@@ -117,7 +117,7 @@ class LoginController extends Controller
         }
         return view('login');
     }
-    public function login(Request $request,FlasherInterface $flasher)
+    public function login(Request $request, FlasherInterface $flasher)
     {
         // Validate the form data
         $credentials = $request->validate([
@@ -127,15 +127,20 @@ class LoginController extends Controller
 
         // Attempt to authenticate the user
         if (Auth::attempt($credentials)) {
-            // Authentication successful, redirect to main route
-            //return redirect()->route('dashboard');
-
-            return redirect()->route('main')->with('success', 'Đăng nhập thành công!');
+            // Authentication passed, get the authenticated user
+            $user = Auth::user();
+            
+            // Redirect to main with success message and username
+            return redirect()->route('main')->with([
+                'success' => 'Đăng nhập thành công!',
+                'username' => $user->name // Assuming you have a 'name' field in users table
+            ]);
         } else {
             // Authentication failed, redirect back to login form
             return redirect()->route('login')->with('error', 'Đăng nhập thất bại!');
         }
     }
+
     // Endpoint xử lý từng số
     public function showMainView()
     {

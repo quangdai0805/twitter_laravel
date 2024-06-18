@@ -7,7 +7,7 @@ use \App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\QdtestController;
 use \App\Http\Controllers\TwitterController;
 Route::get('/', function () {
-    return view('login');
+    return view('main');
 });
 
 // Route::get('test', [\App\Http\Controllers\TestController::class, 'index']);
@@ -19,8 +19,10 @@ Route::get('/', function () {
 // Route::get('/login', 'LoginController@showLoginForm')->name('login');
 // Route::post('/login', 'LoginController@login');
 Route::get('login', [LoginController::class, 'showLoginForm'])->name('login');
-Route::get('logout', [LoginController::class, 'logout'])->name('logout');
 Route::post('login', [LoginController::class, 'login']);
+
+Route::get('logout', [LoginController::class, 'logout'])->name('logout');
+
 // Route::get('accounts', [AccountController::class, 'index'])->name('accounts');
 
 Route::resource('accounts', AccountController::class);
