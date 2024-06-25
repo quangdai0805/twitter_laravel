@@ -9,6 +9,9 @@ use \App\Http\Controllers\TwitterController;
 Route::get('/', function () {
     return view('main');
 });
+Route::get('/test', function () {
+    return view('layout');
+});
 
 // Route::get('test', [\App\Http\Controllers\TestController::class, 'index']);
 
@@ -41,10 +44,16 @@ Route::delete('deleteSelected', [AccountController::class, 'deleteSelected'])->n
 //Route::post('test', [LoginController::class, 'showMainView'])->name('test');;
 // Route::post('process-number', [LoginController::class, 'showMainView']);
 // Route::get('process-number', [LoginController::class, 'processNumber']);
+Route::post('login-selected-accounts', [TwitterController::class, 'loginSelectedAccounts'])->name('login.selected.accounts');
+Route::get('LoginAccount', [TwitterController::class, 'LoginAccount'])->name('LoginAccount');
+
+Route::get('CheckProxy', [TwitterController::class, 'CheckProxy'])->name('CheckProxy');
+Route::post('LikePost', [TwitterController::class, 'LikePost'])->name('LikePost');
+Route::get('CreateRetweet', [TwitterController::class, 'CreateRetweet'])->name('CreateRetweet');
 
 Route::get('main', [LoginController::class, 'showMainView'])->name('main');
 Route::post('testt', [LoginController::class, 'testt'])->name('testt');
 Route::get('x_guest_token', [LoginController::class, 'x_guest_token'])->name('x_guest_token');
 Route::get('testProxy', [LoginController::class, 'testProxy'])->name('testProxy');
-Route::get('LoginAccount', [TwitterController::class, 'LoginAccount'])->name('LoginAccount');
+
 Route::get('qd', [QdtestController::class, 'qd'])->name('qd');

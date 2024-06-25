@@ -23,7 +23,7 @@ return new class extends Migration
             $table->string('restid')->nullable();
             $table->string('follower')->nullable();
             $table->string('following')->nullable();
-            $table->string('cookies')->nullable();
+            $table->string('cookies',5000)->nullable();
             $table->timestamps();
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
         });

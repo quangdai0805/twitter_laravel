@@ -7,14 +7,14 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Cookie\CookieJar;
 use OTPHP\TOTP;
+use Illuminate\Http\Request;
 
 class TwitterController extends Controller
 {
-    //private Account $account;
+    private Account $account;
     private $headerCookies = '';
     private $guestToken = '';
     private $flowToken = '';
-    private $url = 'https://api.twitter.com/1.1/onboarding/task.json';
     protected $client;
     protected $jar;
     public function __construct()
@@ -24,6 +24,11 @@ class TwitterController extends Controller
             'base_uri' => 'https://api.x.com',
             'timeout'  => 10.0,
         ]);
+    }
+
+    public function CheckProxy()
+    {
+        return $this->sendRequest('POST', 'http://ip-api.com/json', $this->get_headers());
     }
 
     public function get_2fa_code($secret)
@@ -57,13 +62,117 @@ class TwitterController extends Controller
         // Your logic here
         return 'Tweet posted: ' . $message;
     }
-    public function LoginAccount(Account $account)
+
+    function getCookieValue($cookies, $cookieName)
+    {
+        preg_match("/{$cookieName}=([^;]*)/", $cookies, $matches);
+        return $matches[1] ?? null;
+    }
+
+    function setCookieValue($cookies, $cookieName, $cookieValue)
+    {
+        // Sử dụng regex để thay thế giá trị của cookie
+        return preg_replace(
+            "/{$cookieName}=([^;]*)/",
+            "{$cookieName}={$cookieValue}",
+            $cookies
+        );
+    }
+
+    
+
+    public function UpdateProfile()
+    {
+        $headers = [
+            'authorization' => 'Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA',
+            'X-Csrf-Token' => $this->getCookieValue($this->headerCookies, 'ct0'), // Assuming the CSRF token is stored in a cookie
+            'Cookie' => $this->headerCookies, // Assuming the auth token is stored in a cookie
+            'authority' => 'twitter.com',
+            'origin' => 'https://twitter.com',
+            'x-twitter-active-user' => 'yes',
+            'x-twitter-client-language' => 'en'
+        ];
+       return $this->sendRequest('POST', 'https://twitter.com/i/api/1.1/account/update_profile.json', $headers);
+    }
+    
+    public function CreateRetweet()
+    {
+        $postID = "1804062472048918555";
+        $this->account = Account::find(13);
+        $cookies = $this->account->cookies;
+        $headers = [
+            'authority' => 'twitter.com',
+            'method' => 'POST',
+            'path' => '/i/api/graphql/ojPdsZsimiJrUGLR1sjUtA/CreateRetweet',
+            'scheme' => 'https',
+            'accept' => '*/*',
+            'accept-encoding' => 'gzip, deflate, br, zstd',
+            'accept-language' => 'en-US,en;q=0.9',
+            'authorization' => 'Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA',
+            'content-length' => '1322',
+            'content-type' => 'application/json',
+            'cookie' => $cookies,
+            'origin' => 'https://twitter.com',
+            'referer' => 'https://twitter.com/home',
+            'x-csrf-token' => $this->getCookieValue($cookies,'ct0'),
+            'x-twitter-active-user' => 'yes',
+            'x-twitter-auth-type' => 'OAuth2Session',
+            'x-twitter-client-language' => 'en',
+        ];
+        $json = json_encode([
+            'variables' => [
+                'tweet_id' => $postID
+            ],
+            'queryId' => 'ojPdsZsimiJrUGLR1sjUtA'
+        ]);
+        $result =  $this->sendRequest('POST', 'https://twitter.com/i/api/graphql/ojPdsZsimiJrUGLR1sjUtA/CreateRetweet', $headers, $json);
+        dd($result);
+    }
+
+    public function LikePost(Request $request)
+    {
+        $postID = $request->input('postid');
+        $this->account = Account::find(15);
+        $cookies = $this->account->cookies;
+        $headers = [
+            'authority' => 'twitter.com',
+            'method' => 'POST',
+            'path' => '/i/api/graphql/OLVH4dMqf6VyvX-XX30pRw/CreateTweet',
+            'scheme' => 'https',
+            'accept' => '*/*',
+            'accept-encoding' => 'gzip, deflate, br, zstd',
+            'accept-language' => 'en-US,en;q=0.9',
+            'authorization' => 'Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA',
+            'content-length' => '1322',
+            'content-type' => 'application/json',
+            'cookie' => $cookies,
+            'origin' => 'https://twitter.com',
+            'referer' => 'https://twitter.com/home',
+            'x-csrf-token' => $this->getCookieValue($cookies,'ct0'),
+            'x-twitter-active-user' => 'yes',
+            'x-twitter-auth-type' => 'OAuth2Session',
+            'x-twitter-client-language' => 'en',
+        ];
+        $json = json_encode([
+            'variables' => [
+                'tweet_id' => $postID
+            ],
+            'queryId' => 'lI07N6Otwv1PhnEgXILM7A'
+        ]);
+        return $this->sendRequest('POST', 'https://x.com/i/api/graphql/lI07N6Otwv1PhnEgXILM7A/FavoriteTweet', $headers, $json);
+    }
+
+    public function LoginAccount(Request $request)
     {
         $output = '';
 
-        $result = $this->initGuestToken();
-        $response = json_decode($result['response'], true);
+        // $accountId = $request->input('accounts');
+        $this->account = Account::find(15);
+        //dd($this->account);
 
+        $result = $this->initGuestToken();
+        // dd($result);
+        $response = json_decode($result['response'], true);
         if ($result['status'] !== 200) {
             return $response['errors'][0]['message'] ?? 'Error';
         }
@@ -73,6 +182,7 @@ class TwitterController extends Controller
         $this->headerCookies .= "gt={$this->guestToken};";
 
         $result = $this->flowStart();
+
         $response = json_decode($result['response'], true);
 
 
@@ -91,8 +201,9 @@ class TwitterController extends Controller
         }
 
         $this->flowToken = $response['flow_token'];
+        $result = $this->flowUsername();
 
-        $result = $this->flowUsername($account->username);
+        
         $response = json_decode($result['response'], true);
 
         if ($result['status'] !== 200) {
@@ -101,10 +212,9 @@ class TwitterController extends Controller
 
         $this->flowToken = $response['flow_token'];
 
-        $result = $this->flowPassword($account->password);
+        $result = $this->flowPassword($this->account->password);
+
         $response = json_decode($result['response'], true);
-
-
 
 
         if ($result['status'] !== 200) {
@@ -126,32 +236,47 @@ class TwitterController extends Controller
 
         $this->flowToken = $response['flow_token'];
 
-        $result = $this->confirmEmail($account->twofa);
+        $result = $this->confirmEmail($this->account->twofa);
         $response = json_decode($result['response'], true);
 
-        dd($result);
 
         if ($result['status'] !== 200) {
             return $response['errors'][0]['message'] ?? 'Error';
         }
-
         $output = $response['subtasks'][0]['subtask_id'] ?? '';
-        //dd($result['headers']['set-cookie']);
-
         if ($output == 'LoginSuccessSubtask') {
             if (isset($result['headers']['set-cookie'])) {
-                //dd($result['headers']['set-cookie']);
                 foreach ($result['headers']['set-cookie'] as $cookie) {
                     $parts = explode(';', $cookie);
                     $this->headerCookies .= "{$parts[0]}; ";
                 }
-
             }
+           
         }
+        $result = $this->UpdateProfile();
+        if($result['status'] === 200){
+            if (isset($result['headers']['set-cookie'])) {
+                foreach ($result['headers']['set-cookie'] as $cookie) {
+                    $parts = explode(';', $cookie);
+                if (strpos($parts[0], 'ct0') !== false) {
+                    $ct0 = str_replace('ct0=', '', $parts[0]);
+                    $this->headerCookies = $this->setCookieValue($this->headerCookies, "ct0", $ct0);
 
-        dd($this->headerCookies);
+                }
+
+                    
+                }
+            }
+            $this->account->cookies = $this->headerCookies;
+            $this->account->save();
+        }
+      
+        dd($result);
         return $output;
     }
+
+
+
 
     private function initGuestToken()
     {
@@ -163,75 +288,50 @@ class TwitterController extends Controller
             'X-Twitter-Client-Language' => 'en',
         ];
 
-        return $this->sendRequest($this->client, 'POST', 'https://api.twitter.com/1.1/guest/activate.json', $headerAccess);
+        return $this->sendRequest('POST', 'https://api.twitter.com/1.1/guest/activate.json', $headerAccess);
     }
 
     private function flowStart()
     {
-
-        $task1Response = $this->client->post($this->url, [
-            'headers' => $this->get_headers(),
-            'cookies' => $this->jar,
-            'query' => [
-                'flow_name' => 'login'
-            ],
-            'json' => [
-                'flow_token' => null,
-
-                'input_flow_data' => [
-                    'country_code' => null,
-                    'flow_context' => [
-                        'referrer_context' => [
-                            'referral_details' => 'utm_source=google-play&utm_medium=organic',
-                            'referrer_url' => ''
-                        ],
-                        'start_location' => [
-                            'location' => 'deeplink'
-                        ]
+        $requestBody = json_encode([
+            'flow_token' => null,
+            'input_flow_data' => [
+                'country_code' => null,
+                'flow_context' => [
+                    'referrer_context' => [
+                        'referral_details' => 'utm_source=google-play&utm_medium=organic',
+                        'referrer_url' => ''
                     ],
-                    'requested_variant' => null,
-                    'target_user_id' => 0
-                ]
+                    'start_location' => [
+                        'location' => 'deeplink'
+                    ]
+                ],
+                'requested_variant' => null,
+                'target_user_id' => 0
             ]
         ]);
-
-        return [
-            'status' => $task1Response->getStatusCode(),
-            'response' => $task1Response->getBody()->getContents(),
-            'headers' => $task1Response->getHeaders()
-        ];
+        return $this->sendRequest('POST', 'https://api.twitter.com/1.1/onboarding/task.json?flow_name=login', $this->get_headers(), $requestBody);
     }
 
     private function flowInstrumentation()
     {
-
-
-        $task1Response = $this->client->post($this->url, [
-            'headers' => $this->get_headers(),
-            'cookies' => $this->jar,
-            'json' => [
-                'flow_token' => $this->flowToken,
-                "subtask_inputs" => [
-                    [
-                        "subtask_id" => "LoginJsInstrumentationSubtask",
-                        "js_instrumentation" => [
-                            "response" => "{}",
-                            "link" => "next_link"
-                        ]
+        $requestBody = json_encode([
+            'flow_token' => $this->flowToken,
+            "subtask_inputs" => [
+                [
+                    "subtask_id" => "LoginJsInstrumentationSubtask",
+                    "js_instrumentation" => [
+                        "response" => "{}",
+                        "link" => "next_link"
                     ]
                 ]
-
             ]
-        ]);
 
-        return [
-            'status' => $task1Response->getStatusCode(),
-            'response' => $task1Response->getBody()->getContents(),
-            'headers' => $task1Response->getHeaders()
-        ];
+        ]);
+        return $this->sendRequest('POST', 'https://api.twitter.com/1.1/onboarding/task.json', $this->get_headers(), $requestBody);
     }
 
-    private function flowUsername($username)
+    private function flowUsername()
     {
         $requestBody = json_encode([
             "flow_token" => $this->flowToken,
@@ -244,7 +344,7 @@ class TwitterController extends Controller
                                 "key" => "user_identifier",
                                 "response_data" => [
                                     "text_data" => [
-                                        "result" => $username
+                                        "result" => $this->account->username
                                     ]
                                 ]
                             ]
@@ -254,107 +354,74 @@ class TwitterController extends Controller
                 ]
             ]
         ]);
-
-        $headerAccess = [
-            'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, như Gecko) Chrome/124.0.0.0 Safari/537.36',
-            'Authorization' => 'Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA',
-            'X-Twitter-Active-User' => 'yes',
-            'X-Twitter-Client-Language' => 'en',
-            'content-type' => 'application/json',
-            'x-guest-token' => $this->guestToken,
-        ];
-
-        return $this->sendRequest($this->client, 'POST', 'https://api.twitter.com/1.1/onboarding/task.json', $this->get_headers(), $requestBody);
+        return $this->sendRequest('POST', 'https://api.twitter.com/1.1/onboarding/task.json', $this->get_headers(), $requestBody);
     }
 
-    private function flowPassword($password)
+    private function flowPassword()
     {
-
-        $response = $this->client->post($this->url, [
-            'headers' => $this->get_headers(),
-            'cookies' => $this->jar,
-            'json' => [
-                'flow_token' => $this->flowToken,
-                "subtask_inputs" => [
-                    [
-                        "subtask_id" => "LoginEnterPassword",
-                        "enter_password" => [
-                            "password" => $password,
-                            "link" => "next_link"
-                        ]
+        $requestBody = json_encode([
+            'flow_token' => $this->flowToken,
+            "subtask_inputs" => [
+                [
+                    "subtask_id" => "LoginEnterPassword",
+                    "enter_password" => [
+                        "password" => $this->account->password,
+                        "link" => "next_link"
                     ]
                 ]
             ]
         ]);
 
-        $responseBody = $response->getBody()->getContents();
-        return [
-            'status' => $response->getStatusCode(),
-            'response' => $responseBody,
-            'headers' => $response->getHeaders()
-        ];
+        return $this->sendRequest('POST', 'https://api.twitter.com/1.1/onboarding/task.json', $this->get_headers(), $requestBody);
     }
 
     private function flowDuplicationCheck()
     {
-        $response = $this->client->post($this->url, [
-            'headers' => $this->get_headers(),
-            'cookies' => $this->jar,
-            'json' => [
-                'flow_token' => $this->flowToken,
-                "subtask_inputs" => [
-                    [
-                        "subtask_id" => "AccountDuplicationCheck",
-                        "check_logged_in_account" => [
-                            "link" => "AccountDuplicationCheck_false"
-                        ]
+        $requestBody = json_encode([
+            'flow_token' => $this->flowToken,
+            "subtask_inputs" => [
+                [
+                    "subtask_id" => "AccountDuplicationCheck",
+                    "check_logged_in_account" => [
+                        "link" => "AccountDuplicationCheck_false"
                     ]
                 ]
             ]
         ]);
 
-        $responseBody = $response->getBody()->getContents();
-        return [
-            'status' => $response->getStatusCode(),
-            'response' => $responseBody,
-            'headers' => $response->getHeaders()
-        ];
-
+        return $this->sendRequest('POST', 'https://api.twitter.com/1.1/onboarding/task.json', $this->get_headers(), $requestBody);
     }
 
     private function confirmEmail($twofa)
     {
-        $response = $this->client->post($this->url, [
-            'headers' => $this->get_headers(),
-            'cookies' => $this->jar,
-            'json' => [
-                'flow_token' => $this->flowToken,
-                "subtask_inputs" => [
-                    [
-                        "subtask_id" => "LoginTwoFactorAuthChallenge",
-                        "enter_text" => [
-                            "text" => $this->get_2fa_code($twofa),
-                            "link" => "next_link"
-                        ]
+        $requestBody = json_encode([
+            'flow_token' => $this->flowToken,
+            "subtask_inputs" => [
+                [
+                    "subtask_id" => "LoginTwoFactorAuthChallenge",
+                    "enter_text" => [
+                        "text" => $this->get_2fa_code($twofa),
+                        "link" => "next_link"
                     ]
                 ]
             ]
         ]);
-        $responseBody = $response->getBody()->getContents();
-        return [
-            'status' => $response->getStatusCode(),
-            'response' => $responseBody,
-            'headers' => $response->getHeaders()
-        ];
+
+        return $this->sendRequest('POST', 'https://api.twitter.com/1.1/onboarding/task.json', $this->get_headers(), $requestBody);
     }
 
-    private function sendRequest($client, $method, $url, $headers, $body = null)
+    private function sendRequest($method, $url, $headers, $body = null)
     {
         try {
-            $response = $client->request($method, $url, [
+            $proxy = $this->account->proxy;
+            $response = $this->client->request($method, $url, [
                 'headers' => $headers,
                 'body' => $body,
                 'cookies' => $this->jar,
+                'proxy' => [
+                    'http'  => "http://$proxy", // Proxy HTTP
+                    // 'https' => "https://$proxy", // Proxy HTTPS (nếu cần)
+                ],
             ]);
 
             $responseBody = $response->getBody()->getContents();

@@ -5,7 +5,7 @@
 
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>INSPINIA | Dashboard v.4</title>
 
     <link href="css/bootstrap.min.css" rel="stylesheet">
@@ -106,43 +106,6 @@
                                 </div>
                             </div>
                             
-                            {{-- Start Todo-List --}}
-{{-- 
-                            <div class="ibox float-e-margins">
-                                <div class="ibox-title">
-                                    <h5>Small todo list</h5>
-                                    <div class="ibox-tools">
-                                        <a class="collapse-link">
-                                            <i class="fa fa-chevron-up"></i>
-                                        </a>
-                                        <a class="close-link">
-                                            <i class="fa fa-times"></i>
-                                        </a>
-                                    </div>
-                                </div>
-                                <div class="ibox-content">
-                                    <ul class="todo-list m-t small-list">
-                                        <li>
-                                            <a href="#" class="check-link"><i class="fa fa-check-square"></i> </a>
-                                            <span class="m-l-xs todo-completed">Buy a milk</span>
-
-                                        </li>
-                                        <li>
-                                            <a href="#" class="check-link"><i class="fa fa-square-o"></i> </a>
-                                            <span class="m-l-xs">Go to shop and find some products.</span>
-
-                                        </li>
-                                        <li>
-                                            <a href="#" class="check-link"><i class="fa fa-square-o"></i> </a>
-                                            <span class="m-l-xs">Send documents to Mike</span>
-                                            <small class="label label-primary"><i class="fa fa-clock-o"></i> 1 mins</small>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div> 
-                            --}}
-
-                            {{-- End Todo List --}}
                             <div class="ibox-content">
                                 
                                 <div class="table-responsive">
@@ -201,15 +164,15 @@
                                     <div class="ibox-content">
                                         <ul class="todo-list m-t small-list">
                                             <li>
-                                                <button type="button" class="btn btn-sm btn-primary"> Login</button> 
+                                                <button id= "loginAccount" type="button" class="btn btn-sm btn-primary"> Login</button> 
                                             </li>
                                             <li>
                                                 <div class="input-group col-sm-6">
                                                     <span class="input-group-btn">
-                                                        <button type="button" class="btn btn-sm btn-primary"> Follow</button> 
+                                                        <button id= "followAccount" type="button" class="btn btn-sm btn-primary"> Follow</button> 
                                                     </span>
 
-                                                    <input type="text" placeholder="UID" class="input-sm form-control">
+                                                    <input id='idAccountFollow' type="text" placeholder="UID" class="input-sm form-control">
                                                 </div>
                                         
     
@@ -226,26 +189,6 @@
                                         </ul>
                                     </div>
                                 </div> 
-
-
-                                {{-- <div class="row">
-
-                                    <div class="col-sm-9 m-b-xs">
-                                        <div data-toggle="buttons" class="btn-group">
-                                            <label class="btn btn-sm btn-white"> <input type="radio" id="option1" name="options"> Day </label>
-                                            <label class="btn btn-sm btn-white active"> <input type="radio" id="option2" name="options"> Week </label>
-                                            <label class="btn btn-sm btn-white"> <input type="radio" id="option3" name="options"> Month </label>
-                                        </div>
-                                    </div>
-                                    <div class="col-sm-3">
-                                        <div class="input-group">
-                                            <input type="text" placeholder="Search" class="input-sm form-control">
-                                            <span class="input-group-btn">
-                                                <button type="button" class="btn btn-sm btn-primary"> Go!</button> 
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div> --}}
 
                             </div>
                         </div>
@@ -315,6 +258,119 @@
         }
     </script>
 
+    <script src="js/login.js"></script>
+    {{-- <script>
+        $(document).ready(function() {
+            $('#loginAccount').click(function() {
+                //alert('Please select at least one account.');
+                // var selectedAccounts = [];
+                // $('input[name="accounts[]"]:checked').each(function() {
+                //     selectedAccounts.push($(this).val());
+                // });
+
+                var selectedAccounts = [];
+                var checkboxes = document.querySelectorAll('input[name="selected_accounts[]"]:checked');
+
+                for (var checkbox of checkboxes) {
+                    selectedAccounts.push(checkbox.value);
+                }
+
+
+                if (selectedAccounts.length === 0) {
+                    alert('Please select at least one account.');
+                    return;
+                }else{
+                    alert(selectedAccounts.length);
+                }
+
+                $.ajax({
+                    url: '{{ route("login.selected.accounts") }}',
+                    type: 'POST',
+                    data: {
+                        accounts: selectedAccounts,
+                        _token: '{{ csrf_token() }}'
+                    },
+                    success: function(response) {
+                        alert('Request was successful!');
+                        console.log(response);
+                    },
+                    error: function(xhr, status, error) {
+                        alert('An error occurred.');
+                        console.log(error);
+                    }
+                });
+            });
+        });
+    </script> --}}
+     {{-- <script>
+        // document.getElementById('loginAccount').onclick = function() {
+        //     var selectedAccounts = [];
+        //     var checkboxes = document.querySelectorAll('input[name="selected_accounts[]"]:checked');
+        //     alert(checkboxes.length);
+        //     for (var checkbox of checkboxes) {
+        //         selectedAccounts.push(checkbox.value);
+        //     }
+
+        //     // Send AJAX request to the server
+        //     $.ajax({
+        //         url: "{{ route('LoginAccount') }}",
+        //         type: 'POST',
+        //         data: {
+        //             _token: "{{ csrf_token() }}",
+        //             selected_accounts: selectedAccounts
+        //         },
+        //         success: function(response) {
+        //             alert(response.message); // Show success message or handle as needed
+        //         },
+        //         error: function(xhr) {
+        //             alert('An error occurred.'); // Show error message or handle as needed
+        //         }
+        //     });
+        // };
+        $(document).ready(function() {
+            $('#loginAccount').click(function() {
+                // Lấy tất cả các checkbox đã được check
+                // var selected = [];
+                // $('input[name="selected_accounts[]"]:checked').each(function() {
+                //     // selected.push($(this).val());
+                // });
+
+                // alert(selected.length);
+                var selectedAccounts = [];
+                var checkboxes = document.querySelectorAll('input[name="selected_accounts[]"]:checked');
+                for (var checkbox of checkboxes) {
+                    selectedAccounts.push(checkbox.value);
+                }
+
+
+                // Kiểm tra nếu không có checkbox nào được check
+                if (selectedAccounts.length === 0) {
+                    alert('Please select at least one item.');
+                    return;
+                }else{
+                    alert(selectedAccounts.length);
+                }
+
+                // Gửi yêu cầu POST với danh sách các checkbox đã được chọn
+                $.ajax({
+                    url: '{{ route("LoginAccount") }}', // Đường dẫn đến controller
+                    type: 'POST',
+                    data: {
+                        selected: selected,
+                        _token: '{{ csrf_token() }}' // Laravel CSRF token
+                    },
+                    success: function(response) {
+                        alert('Request was successful!');
+                        console.log(response);
+                    },
+                    error: function(xhr, status, error) {
+                        alert('An error occurred.');
+                        console.log(error);
+                    }
+                });
+            });
+        });
+    </script> --}}
 </body>
 
 </html>
