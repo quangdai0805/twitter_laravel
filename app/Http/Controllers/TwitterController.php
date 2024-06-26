@@ -17,6 +17,9 @@ class TwitterController extends Controller
     private $flowToken = '';
     protected $client;
     protected $jar;
+
+    private $url = 'https://twitter.com/account/access';
+    private $tokens = [];
     public function __construct()
     {
         $this->jar = new CookieJar();
@@ -79,7 +82,7 @@ class TwitterController extends Controller
         );
     }
 
-    
+
 
     public function UpdateProfile()
     {
@@ -92,9 +95,9 @@ class TwitterController extends Controller
             'x-twitter-active-user' => 'yes',
             'x-twitter-client-language' => 'en'
         ];
-       return $this->sendRequest('POST', 'https://twitter.com/i/api/1.1/account/update_profile.json', $headers);
+        return $this->sendRequest('POST', 'https://twitter.com/i/api/1.1/account/update_profile.json', $headers);
     }
-    
+
     public function CreateRetweet()
     {
         $postID = "1804062472048918555";
@@ -114,7 +117,7 @@ class TwitterController extends Controller
             'cookie' => $cookies,
             'origin' => 'https://twitter.com',
             'referer' => 'https://twitter.com/home',
-            'x-csrf-token' => $this->getCookieValue($cookies,'ct0'),
+            'x-csrf-token' => $this->getCookieValue($cookies, 'ct0'),
             'x-twitter-active-user' => 'yes',
             'x-twitter-auth-type' => 'OAuth2Session',
             'x-twitter-client-language' => 'en',
@@ -131,6 +134,7 @@ class TwitterController extends Controller
 
     public function LikePost(Request $request)
     {
+        
         $postID = $request->input('postid');
         $this->account = Account::find(15);
         $cookies = $this->account->cookies;
@@ -148,7 +152,7 @@ class TwitterController extends Controller
             'cookie' => $cookies,
             'origin' => 'https://twitter.com',
             'referer' => 'https://twitter.com/home',
-            'x-csrf-token' => $this->getCookieValue($cookies,'ct0'),
+            'x-csrf-token' => $this->getCookieValue($cookies, 'ct0'),
             'x-twitter-active-user' => 'yes',
             'x-twitter-auth-type' => 'OAuth2Session',
             'x-twitter-client-language' => 'en',
@@ -164,11 +168,14 @@ class TwitterController extends Controller
 
     public function LoginAccount(Request $request)
     {
+
         $output = '';
 
         // $accountId = $request->input('accounts');
-        $this->account = Account::find(15);
-        //dd($this->account);
+        $this->account = Account::find(7);
+
+        $this->unlock();
+        dd($this->account);
 
         $result = $this->initGuestToken();
         // dd($result);
@@ -203,7 +210,7 @@ class TwitterController extends Controller
         $this->flowToken = $response['flow_token'];
         $result = $this->flowUsername();
 
-        
+
         $response = json_decode($result['response'], true);
 
         if ($result['status'] !== 200) {
@@ -251,29 +258,215 @@ class TwitterController extends Controller
                     $this->headerCookies .= "{$parts[0]}; ";
                 }
             }
-           
         }
+
+        $this->account->cookies = $this->headerCookies;
+        $this->account->save();
+
+        dd($result);
+
+
         $result = $this->UpdateProfile();
-        if($result['status'] === 200){
+        if ($result['status'] === 200) {
             if (isset($result['headers']['set-cookie'])) {
                 foreach ($result['headers']['set-cookie'] as $cookie) {
                     $parts = explode(';', $cookie);
-                if (strpos($parts[0], 'ct0') !== false) {
-                    $ct0 = str_replace('ct0=', '', $parts[0]);
-                    $this->headerCookies = $this->setCookieValue($this->headerCookies, "ct0", $ct0);
-
-                }
-
-                    
+                    if (strpos($parts[0], 'ct0') !== false) {
+                        $ct0 = str_replace('ct0=', '', $parts[0]);
+                        $this->headerCookies = $this->setCookieValue($this->headerCookies, "ct0", $ct0);
+                    }
                 }
             }
-            $this->account->cookies = $this->headerCookies;
-            $this->account->save();
+
         }
-      
-        dd($result);
+
+
+
+        $this->unlock();
+
+        
+
         return $output;
     }
+
+
+
+    //Func Unlock
+
+
+    public function Header_Unlock()
+    {
+        return [
+
+            "User-Agent" => "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:123.0) Gecko/20100101 Firefox/123.0",
+            "Accept" => "*/*",
+            "Accept-Language" => "en-GB,en;q=0.5",
+            "Accept-Encoding" => "gzip, deflate, br",
+            "DNT" => "1",
+            "Sec-GPC" => "1",
+            "Connection" => "keep-alive",
+            "Sec-Fetch-Dest" => "script",
+            "Sec-Fetch-Mode" => "no-cors",
+            "Sec-Fetch-Site" => "same-origin",
+            "Pragma" => "no-cache",
+            "Cache-Control" => "no-cache",
+            "TE" => "trailers"
+        ];
+    }
+
+
+    private function extractTokensFromAccessHtmlPage(string $html)
+    {
+        if (preg_match('/<input type="hidden" name="authenticity_token" value="([^"]+)"/', $html, $matches)) {
+            $authenticity_token = $matches[1];
+        }
+        if (preg_match('/<input type="hidden" name="assignment_token" value="([^"]+)"/', $html, $matches)) {
+            $assignment_token = $matches[1];
+        }
+        
+        $this->tokens = [
+            "authenticity_token" => $authenticity_token,
+            "assignment_token" => $assignment_token
+        ];
+    }
+
+    private function jsInst()
+    {
+        $response = $this->client->get("https://twitter.com/i/js_inst?c_name=ui_metrics");
+        $jsScript = (string) $response->getBody();
+        preg_match('/return\s*({.*?});/s', $jsScript, $matches);
+        return $matches[1];
+    }
+
+
+    private function getAccessPage()
+    {
+        //return $this->sendRequest('GET', $this->url, $this->Header_Unlock());
+        $response = $this->client->get($this->url, [
+            'headers' =>[
+                "User-Agent" => "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:123.0) Gecko/20100101 Firefox/123.0",
+                'cookie' => $this->account->cookies,
+            ],
+        ]);
+        $this->account->cookies = $response->getHeader('Set-Cookie');
+        $this->extractTokensFromAccessHtmlPage((string) $response->getBody());
+
+    }
+
+    private function postToAccessPage(array $data)
+    {
+        $headers = $this->Header_Unlock();
+        $headers['Host'] = "twitter.com";
+        $headers['Origin'] = "https://twitter.com";
+        $headers['Referer'] = "https://twitter.com/account/access";
+
+        $response = $this->client->post($this->url . '?lang=en', [
+            'form_params' => $data,
+            'headers' => $headers,
+            'cookies' => $this->account->cookies
+        ]);
+        $this->account->cookies = $response->getHeader('Set-Cookie');
+        $this->extractTokensFromAccessHtmlPage((string) $response->getBody());
+    }
+
+    private function dataWithJsInst(array $tokens)
+    {
+        return [
+            "authenticity_token" => $tokens["authenticity_token"],
+            "assignment_token" => $tokens["assignment_token"],
+            "lang" => "en",
+            "flow" => "",
+            "ui_metrics" => $this->jsInst()
+        ];
+    }
+
+    private function dataWithFuncaptcha(array $tokens, string $funCaptchaToken)
+    {
+        return [
+            "authenticity_token" => $tokens["authenticity_token"],
+            "assignment_token" => $tokens["assignment_token"],
+            'lang' => 'en',
+            'flow' => '',
+            'verification_string' => $funCaptchaToken,
+            'language_code' => 'en'
+        ];
+    }
+
+    private function postDataWithToken(string $funCaptchaToken)
+    {
+        $data = $this->dataWithFuncaptcha($this->tokens, $funCaptchaToken);
+        $this->postToAccessPage($data);
+    }
+
+    private function postDataWithJsInst()
+    {
+        $data = $this->dataWithJsInst($this->tokens);
+        $this->postToAccessPage($data);
+    }
+
+    function getCaptchaKey($apiKey, $proxy) {
+        $urlCreateTask = "https://api.capsolver.com/createTask";
+        $urlGetTaskResult = "https://api.capsolver.com/getTaskResult";
+    
+        $payloadCreateTask = [
+            'clientKey' => $apiKey,
+            'task' => [
+                'type' => 'FunCaptchaTask',
+                'websitePublicKey' => '0152B4EB-D2DC-460A-89A1-629838B529C9',
+                'websiteURL' => 'https://twitter.com/account/access',
+                'proxy' => $proxy
+            ]
+        ];
+    
+
+        try {
+            $responseCreateTask = $this->client->post($urlCreateTask, [
+                'json' => $payloadCreateTask
+            ]);
+    
+            $resultCreateTask = json_decode($responseCreateTask->getBody(), true);
+            $taskId = $resultCreateTask['taskId'];
+    
+            $payloadGetTaskResult = [
+                'taskId' => $taskId,
+                'clientKey' => $apiKey
+            ];
+    
+            while (true) {
+                $responseGetTaskResult = $this->client->post($urlGetTaskResult, [
+                    'json' => $payloadGetTaskResult
+                ]);
+    
+                $resultGetTaskResult = json_decode($responseGetTaskResult->getBody(), true);
+    
+                if ($resultGetTaskResult['status'] === 'ready') {
+                    return $resultGetTaskResult['solution']['token'];
+                }
+    
+                sleep(1); // Chờ 1 giây trước khi kiểm tra lại
+            }
+        } catch (\Exception $e) {
+            echo 'Caught exception: ',  $e->getMessage(), "\n";
+        }
+    }
+
+    public function unlock()
+    {
+
+        $this->getAccessPage();
+        $this->postDataWithJsInst();
+
+        $funCaptchaToken = $this->getCaptchaKey('CAP-B297817280A9A6B7DA09AE5EF91A8A43', $this->account->proxy);
+        $this->postDataWithToken($funCaptchaToken);
+        $funCaptchaToken = $this->getCaptchaKey('CAP-B297817280A9A6B7DA09AE5EF91A8A43', $this->account->proxy);
+        $this->postDataWithToken($funCaptchaToken);
+        echo $funCaptchaToken;
+        $this->postDataWithJsInst();
+    }
+
+
+    //End Unlock
+
 
 
 
