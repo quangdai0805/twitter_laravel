@@ -134,7 +134,7 @@ class TwitterController extends Controller
 
     public function LikePost(Request $request)
     {
-        
+
         $postID = $request->input('postid');
         $this->account = Account::find(15);
         $cookies = $this->account->cookies;
@@ -172,10 +172,10 @@ class TwitterController extends Controller
         $output = '';
 
         // $accountId = $request->input('accounts');
-        $this->account = Account::find(7);
-
-        $this->unlock();
-        dd($this->account);
+        $this->account = Account::find(21);
+        // dd($this->account);
+        // $this->unlock();
+        // dd($this->account);
 
         $result = $this->initGuestToken();
         // dd($result);
@@ -262,7 +262,7 @@ class TwitterController extends Controller
 
         $this->account->cookies = $this->headerCookies;
         $this->account->save();
-
+        dd($this->jar);
         dd($result);
 
 
@@ -277,14 +277,13 @@ class TwitterController extends Controller
                     }
                 }
             }
-
         }
 
 
 
         $this->unlock();
 
-        
+
 
         return $output;
     }
@@ -296,22 +295,94 @@ class TwitterController extends Controller
 
     public function Header_Unlock()
     {
-        return [
-
-            "User-Agent" => "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:123.0) Gecko/20100101 Firefox/123.0",
-            "Accept" => "*/*",
-            "Accept-Language" => "en-GB,en;q=0.5",
-            "Accept-Encoding" => "gzip, deflate, br",
-            "DNT" => "1",
-            "Sec-GPC" => "1",
-            "Connection" => "keep-alive",
-            "Sec-Fetch-Dest" => "script",
-            "Sec-Fetch-Mode" => "no-cors",
-            "Sec-Fetch-Site" => "same-origin",
-            "Pragma" => "no-cache",
-            "Cache-Control" => "no-cache",
-            "TE" => "trailers"
+        $headers = [
+            'authority' => 'twitter.com',
+            'method' => 'POST',
+            'path' => '/account/access?lang=en',
+            'scheme' => 'https',
+            'Accept' => 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+            'Accept-Language' => 'en-US,en;q=0.9',
+            'Cache-Control' => 'max-age=0',
+            'Content-Length' => '818',
+            'Content-Type' => 'application/x-www-form-urlencoded',
+            'Cookie' => $this->account->cookies,
+            'Origin' => 'https://twitter.com',
+            'Referer' => 'https://twitter.com/account/access',
+            'Sec-Ch-Ua' => '"Microsoft Edge";v="123", "Not:A-Brand";v="8", "Chromium";v="123"',
+            'Sec-Ch-Ua-Mobile' => '?0',
+            'Sec-Ch-Ua-Platform' => '"Windows"',
+            'Sec-Fetch-Dest' => 'document',
+            'Sec-Fetch-Mode' => 'navigate',
+            'Sec-Fetch-Site' => 'same-origin',
+            'Sec-Fetch-User' => '?1',
+            'Upgrade-Insecure-Requests' => '1',
+            'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:123.0) Gecko/20100101 Firefox/123.0'
         ];
+        return $headers;
+    }
+
+
+    public function accessUnlockCaptcha()
+    {
+        $client = new Client();
+
+        // Headers
+        $headers = [
+            'authority' => 'twitter.com',
+            'method' => 'POST',
+            'path' => '/account/access?lang=en',
+            'scheme' => 'https',
+            'Accept' => 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+            'Accept-Language' => 'en-US,en;q=0.9',
+            'Cache-Control' => 'max-age=0',
+            'Content-Length' => '818',
+            'Content-Type' => 'application/x-www-form-urlencoded',
+            'Cookie' => $this->headerCookies,
+            'Origin' => 'https://twitter.com',
+            'Referer' => 'https://twitter.com/account/access',
+            'Sec-Ch-Ua' => '"Microsoft Edge";v="123", "Not:A-Brand";v="8", "Chromium";v="123"',
+            'Sec-Ch-Ua-Mobile' => '?0',
+            'Sec-Ch-Ua-Platform' => '"Windows"',
+            'Sec-Fetch-Dest' => 'document',
+            'Sec-Fetch-Mode' => 'navigate',
+            'Sec-Fetch-Site' => 'same-origin',
+            'Sec-Fetch-User' => '?1',
+            'Upgrade-Insecure-Requests' => '1',
+            'User-Agent' => 'your-user-agent-here'
+        ];
+
+        // Lấy captcha token từ QD_Helper
+        $captchaToken = $this->getCaptchaKey('CAP-B297817280A9A6B7DA09AE5EF91A8A43', $this->account->proxy);
+        
+
+        // Payload
+        $payload = [
+            'authenticity_token' => $this->tokens["authenticity_token"],
+            'assignment_token' => $this->tokens["assignment_token"],
+            'lang' => 'en',
+            'verification_string' => $captchaToken,
+            'flow' => '',
+            'language_code' => 'en'
+        ];
+
+        
+        // Gửi yêu cầu POST
+        try {
+            $response = $client->post('https://twitter.com/account/access?lang=en', [
+                'headers' => $headers,
+                'form_params' => $payload
+            ]);
+
+            return response()->json([
+                'status' => 'success',
+                'response' => $response->getBody()->getContents()
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $e->getMessage()
+            ]);
+        }
     }
 
 
@@ -323,7 +394,7 @@ class TwitterController extends Controller
         if (preg_match('/<input type="hidden" name="assignment_token" value="([^"]+)"/', $html, $matches)) {
             $assignment_token = $matches[1];
         }
-        
+
         $this->tokens = [
             "authenticity_token" => $authenticity_token,
             "assignment_token" => $assignment_token
@@ -343,27 +414,21 @@ class TwitterController extends Controller
     {
         //return $this->sendRequest('GET', $this->url, $this->Header_Unlock());
         $response = $this->client->get($this->url, [
-            'headers' =>[
+            'headers' => [
                 "User-Agent" => "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:123.0) Gecko/20100101 Firefox/123.0",
                 'cookie' => $this->account->cookies,
             ],
         ]);
         $this->account->cookies = $response->getHeader('Set-Cookie');
         $this->extractTokensFromAccessHtmlPage((string) $response->getBody());
-
     }
 
     private function postToAccessPage(array $data)
     {
-        $headers = $this->Header_Unlock();
-        $headers['Host'] = "twitter.com";
-        $headers['Origin'] = "https://twitter.com";
-        $headers['Referer'] = "https://twitter.com/account/access";
 
-        $response = $this->client->post($this->url . '?lang=en', [
+        $response = $this->client->post('https://twitter.com/account/access?lang=en', [
             'form_params' => $data,
-            'headers' => $headers,
-            'cookies' => $this->account->cookies
+            'headers' => $this->Header_Unlock(),
         ]);
         $this->account->cookies = $response->getHeader('Set-Cookie');
         $this->extractTokensFromAccessHtmlPage((string) $response->getBody());
@@ -404,10 +469,11 @@ class TwitterController extends Controller
         $this->postToAccessPage($data);
     }
 
-    function getCaptchaKey($apiKey, $proxy) {
+    function getCaptchaKey($apiKey, $proxy)
+    {
         $urlCreateTask = "https://api.capsolver.com/createTask";
         $urlGetTaskResult = "https://api.capsolver.com/getTaskResult";
-    
+
         $payloadCreateTask = [
             'clientKey' => $apiKey,
             'task' => [
@@ -417,32 +483,32 @@ class TwitterController extends Controller
                 'proxy' => $proxy
             ]
         ];
-    
+
 
         try {
             $responseCreateTask = $this->client->post($urlCreateTask, [
                 'json' => $payloadCreateTask
             ]);
-    
+
             $resultCreateTask = json_decode($responseCreateTask->getBody(), true);
             $taskId = $resultCreateTask['taskId'];
-    
+
             $payloadGetTaskResult = [
                 'taskId' => $taskId,
                 'clientKey' => $apiKey
             ];
-    
+
             while (true) {
                 $responseGetTaskResult = $this->client->post($urlGetTaskResult, [
                     'json' => $payloadGetTaskResult
                 ]);
-    
+
                 $resultGetTaskResult = json_decode($responseGetTaskResult->getBody(), true);
-    
+
                 if ($resultGetTaskResult['status'] === 'ready') {
                     return $resultGetTaskResult['solution']['token'];
                 }
-    
+
                 sleep(1); // Chờ 1 giây trước khi kiểm tra lại
             }
         } catch (\Exception $e) {
@@ -603,13 +669,14 @@ class TwitterController extends Controller
         return $this->sendRequest('POST', 'https://api.twitter.com/1.1/onboarding/task.json', $this->get_headers(), $requestBody);
     }
 
-    private function sendRequest($method, $url, $headers, $body = null)
+    private function sendRequest($method, $url, $headers, $body = null, $param = null)
     {
         try {
             $proxy = $this->account->proxy;
             $response = $this->client->request($method, $url, [
                 'headers' => $headers,
                 'body' => $body,
+                'form_params' => $param,
                 'cookies' => $this->jar,
                 'proxy' => [
                     'http'  => "http://$proxy", // Proxy HTTP

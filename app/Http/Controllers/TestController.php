@@ -4,11 +4,12 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use GuzzleHttp\Client;
+
 class TestController extends Controller
 {
-    public function testProxy(){
-        $client = new Client([
-        ]);
+    public function testProxy()
+    {
+        $client = new Client([]);
 
         try {
             $response = $client->request('GET', 'http://ip-api.com/json');
@@ -41,6 +42,39 @@ class TestController extends Controller
     /**
      * Display a listing of the resource.
      */
+
+
+     public function runPythonScript()
+     {
+         // Đường dẫn tới file Python trong thư mục public
+         // Chạy file Python
+         $output = shell_exec("python test.py");
+ 
+         // Kiểm tra kết quả đầu ra
+         if ($output === null) {
+             return response()->json([
+                 'status' => 'error',
+                 'message' => 'Failed to run Python script or no output received.'
+             ]);
+         }
+ 
+         // Giả sử output là JSON
+         $result = json_decode($output, true);
+ 
+         if ($result === null) {
+             return response()->json([
+                 'status' => 'error',
+                 'message' => 'Failed to decode JSON or script output is not JSON.',
+                 'output' => $output
+             ]);
+         }
+ 
+         return response()->json([
+             'status' => 'success',
+             'data' => $result
+         ]);
+     }
+
     public function x_guest_token()
     {
         $client = new Client();

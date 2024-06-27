@@ -5,12 +5,18 @@ use \App\Http\Controllers\TestController;
 use \App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\QdtestController;
 use \App\Http\Controllers\TwitterController;
+use App\Http\Controllers\UnlockController;
+
 Route::get('/', function () {
     return view('main');
 });
 Route::get('/test', function () {
     return view('layout');
 });
+
+Route::get('/run-python-script', [TestController::class, 'runPythonScript']);
+
+Route::get('/unlock-account', [UnlockController::class, 'unlockAccount']);
 
 // Route::get('test', [\App\Http\Controllers\TestController::class, 'index']);
 
