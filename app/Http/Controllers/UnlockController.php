@@ -4,32 +4,35 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use GuzzleHttp\Client;
+use GuzzleHttp\Cookie\CookieJar;
 use Illuminate\Support\Facades\Log;
+
 class UnlockController extends Controller
 {
-    //
     private $apiKey;
     private $proxy;
-
+    protected $jar;
+    private $tokens = [];
     public function __construct()
     {
         $this->apiKey = 'CAP-B297817280A9A6B7DA09AE5EF91A8A43'; // Thay bằng API key của bạn
         $this->proxy = 'beoxiycq:ch6mxkmwlpbg@154.9.177.180:5460'; // Thay bằng proxy của bạn
+        $this->jar = new CookieJar();
     }
 
-    public function getCaptchaKey()
+    public function getCaptchaKey($apiKey, $proxy)
     {
         Log::info("SOLVING CAPTCHA...");
         $urlCreateTask = "https://api.capsolver.com/createTask";
         $urlGetTaskResult = "https://api.capsolver.com/getTaskResult";
 
         $payloadCreateTask = [
-            "clientKey" => $this->apiKey,
+            "clientKey" => $apiKey,
             "task" => [
                 "type" => "FunCaptchaTask",
                 "websitePublicKey" => "0152B4EB-D2DC-460A-89A1-629838B529C9",
                 "websiteURL" => "https://twitter.com/account/access",
-                "proxy" => $this->proxy
+                "proxy" => $proxy
             ]
         ];
 
@@ -47,7 +50,7 @@ class UnlockController extends Controller
 
         $payloadGetTaskResult = [
             "taskId" => $taskId,
-            "clientKey" => $this->apiKey
+            "clientKey" => $apiKey
         ];
 
         // Poll for result
@@ -63,24 +66,23 @@ class UnlockController extends Controller
                 return $resultGetTaskResult['solution']['token'];
             }
 
-            sleep(1); // Chờ 1 giây trước khi kiểm tra lại
+            sleep(1);
         }
     }
 
-    private function extractTokensFromAccessHtmlPage($html)
+    private function extractTokensFromAccessHtmlPage(string $html)
     {
-        preg_match_all('/name="authenticity_token" value="([^"]+)"|name="assignment_token" value="([^"]+)"/', $html, $matches);
-        
-        if (!empty($matches[1][0]) && !empty($matches[2][0])) {
-            $authenticityToken = $matches[1][0];
-            $assignmentToken = $matches[2][0];
-            return [
-                "authenticity_token" => $authenticityToken,
-                "assignment_token" => $assignmentToken
-            ];
+        if (preg_match('/<input type="hidden" name="authenticity_token" value="([^"]+)"/', $html, $matches)) {
+            $authenticity_token = $matches[1];
+        }
+        if (preg_match('/<input type="hidden" name="assignment_token" value="([^"]+)"/', $html, $matches)) {
+            $assignment_token = $matches[1];
         }
 
-        return null;
+        $this->tokens = [
+            "authenticity_token" => $authenticity_token,
+            "assignment_token" => $assignment_token
+        ];
     }
 
     private function getAccessPage($client, $cookies)
@@ -104,9 +106,9 @@ class UnlockController extends Controller
             'cookies' => $cookies,
             'proxy' => $this->proxy
         ]);
-
         $html = (string) $response->getBody();
-        return $this->extractTokensFromAccessHtmlPage($html);
+        $this->extractTokensFromAccessHtmlPage($html);
+        return $html;
     }
 
     private function postToAccessPage($client, $cookies, $data)
@@ -136,55 +138,62 @@ class UnlockController extends Controller
         ]);
 
         $html = (string) $response->getBody();
-        return $this->extractTokensFromAccessHtmlPage($html);
+        $this->extractTokensFromAccessHtmlPage($html);
+        return $html;
     }
 
+    private function loadCookiesFromDatabase()
+    {
+        $cookiesString = 'kdt=YRV2iD4IiRb1x5gzeNCesP7DluuUpk6uW2I48qlk; att=; twid="u=1709000880245399552"; ct0=551361b1381b90ba56b030697d7fb132; auth_token=74ef727a9338e6a849975209a7d21b4de86f27a5; ';
+        $cookiesString = rtrim($cookiesString, '; ');
+
+        if ($cookiesString) {
+            $cookiesArray = explode('; ', $cookiesString);
+            // dd($cookiesArray);
+            foreach ($cookiesArray as $cookieString) {
+                list($name, $value) = explode('=', $cookieString, 2);
+                $this->jar->setCookie(new \GuzzleHttp\Cookie\SetCookie(['Name' => $name, 'Value' => $value, 'Domain' => 'twitter.com']));
+            }
+        }
+    }
     public function unlockAccount()
     {
-        // $authToken = $request->input('auth_token');
-        // $ct0 = $request->input('ct0');
-        // $proxy = $request->input('proxy', $this->proxy);
 
-        $authToken = '1089b92a1cf4af341a9ea4310dfb819c0db3991f';
-        $ct0 = '9a43545c35c48444dd0d8a4e623aec9b';
-        $proxy = '';
-        // Giả lập cookies
-        $cookies = [
-            "auth_token" => $authToken,
-            "ct0" => $ct0
-        ];
-
-        $client = new Client(['cookies' => true]);
+        $this->loadCookiesFromDatabase();
+        $client = new Client(['cookies' => $this->jar]);
 
         Log::info("UNLOCKING ACCOUNT...");
 
-        $tokens = $this->getAccessPage($client, $cookies);
+
+        $this->getAccessPage($client, $this->jar);
 
         $dataJsInst = [
-            "authenticity_token" => $tokens["authenticity_token"],
-            "assignment_token" => $tokens["assignment_token"],
+            "authenticity_token" => $this->tokens["authenticity_token"],
+            "assignment_token" => $this->tokens["assignment_token"],
             "lang" => "en",
             "flow" => ""
         ];
-        $this->postToAccessPage($client, $cookies, $dataJsInst);
 
-        $captchaToken = $this->getCaptchaKey();
+        $this->postToAccessPage($client, $this->jar, $dataJsInst);
+
+        $captchaToken = $this->getCaptchaKey($this->apiKey, $this->proxy);
 
         $dataWithToken = [
-            "authenticity_token" => $tokens["authenticity_token"],
-            "assignment_token" => $tokens["assignment_token"],
+            "authenticity_token" => $this->tokens["authenticity_token"],
+            "assignment_token" => $this->tokens["assignment_token"],
             'lang' => 'en',
             'flow' => '',
             'verification_string' => $captchaToken,
             'language_code' => 'en'
         ];
-        $this->postToAccessPage($client, $cookies, $dataWithToken);
+        $this->postToAccessPage($client, $this->jar, $dataWithToken);
 
-        $captchaToken = $this->getCaptchaKey();
+        $captchaToken = $this->getCaptchaKey($this->apiKey, $this->proxy);
         $dataWithToken['verification_string'] = $captchaToken;
-        $this->postToAccessPage($client, $cookies, $dataWithToken);
+        $reslut = $this->postToAccessPage($client, $this->jar, $dataWithToken);
+        $result2 =  $this->postToAccessPage($client, $this->jar, $dataJsInst);
 
-        $this->postToAccessPage($client, $cookies, $dataJsInst);
+        dd($reslut,$result2);
 
         Log::info("ACCOUNT UNLOCKED...");
 

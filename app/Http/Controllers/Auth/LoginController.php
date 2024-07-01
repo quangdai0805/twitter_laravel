@@ -1,12 +1,10 @@
 <?php
 
 namespace App\Http\Controllers\Auth;
-
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use GuzzleHttp\Client;
-use GuzzleHttp\Exception\RequestException;
 use Flasher\Prime\FlasherInterface;
 class LoginController extends Controller
 {
@@ -32,27 +30,6 @@ class LoginController extends Controller
 
     public function testt(Request $request)
     {
-        // $username = $request->input('username');
-        // $client = new Client();
-        // $headerAccess = [
-        //     'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, như Gecko) Chrome/124.0.0.0 Safari/537.36',
-        //     'Authorization' => 'Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA',
-        //     'X-Twitter-Active-User' => 'yes',
-        //     'X-Twitter-Client-Language' => 'en'
-        // ];
-        // $options = [
-        //     'headers' => $headerAccess
-        // ];
-
-        // $response = $client->request('POST', 'https://api.twitter.com/1.1/guest/activate.json', $options);
-        // $result = $response->getBody()->getContents();
-        // $jsonResponse = json_decode($result, true);
-        // $guestToken  = "";
-        // if (isset($jsonResponse['guest_token'])) {
-        //     $guestToken = $jsonResponse['guest_token'];
-        // } else {
-        // }
-
         $username = $request->input('username');
         $guestToken = $request->input('guestToken');
 

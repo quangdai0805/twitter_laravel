@@ -122,6 +122,7 @@ class AccountController extends Controller
             'selected_accounts' => 'required|array',
             'selected_accounts.*' => 'exists:accounts,id',
         ]);
+
         Account::whereIn('id', $request->selected_accounts)->delete();
 
         return redirect()->back()->with('success', 'Selected accounts deleted successfully!');

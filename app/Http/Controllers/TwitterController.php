@@ -62,7 +62,6 @@ class TwitterController extends Controller
     }
     public function postTweet($message)
     {
-        // Your logic here
         return 'Tweet posted: ' . $message;
     }
 
@@ -88,8 +87,8 @@ class TwitterController extends Controller
     {
         $headers = [
             'authorization' => 'Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA',
-            'X-Csrf-Token' => $this->getCookieValue($this->headerCookies, 'ct0'), // Assuming the CSRF token is stored in a cookie
-            'Cookie' => $this->headerCookies, // Assuming the auth token is stored in a cookie
+            'X-Csrf-Token' => $this->getCookieValue($this->headerCookies, 'ct0'),
+            'Cookie' => $this->headerCookies,
             'authority' => 'twitter.com',
             'origin' => 'https://twitter.com',
             'x-twitter-active-user' => 'yes',
@@ -98,11 +97,14 @@ class TwitterController extends Controller
         return $this->sendRequest('POST', 'https://twitter.com/i/api/1.1/account/update_profile.json', $headers);
     }
 
-    public function CreateRetweet()
+    public function CreateRetweet(Request $request)
     {
-        $postID = "1804062472048918555";
-        $this->account = Account::find(13);
+
+        $postID = "1806502616354238833";
+        $this->account = Account::find(28);
         $cookies = $this->account->cookies;
+        $this->loadCookiesFromDatabase();
+        dd($this->jar);
         $headers = [
             'authority' => 'twitter.com',
             'method' => 'POST',
@@ -114,7 +116,7 @@ class TwitterController extends Controller
             'authorization' => 'Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA',
             'content-length' => '1322',
             'content-type' => 'application/json',
-            'cookie' => $cookies,
+            // 'cookie' => $cookies,
             'origin' => 'https://twitter.com',
             'referer' => 'https://twitter.com/home',
             'x-csrf-token' => $this->getCookieValue($cookies, 'ct0'),
@@ -129,14 +131,24 @@ class TwitterController extends Controller
             'queryId' => 'ojPdsZsimiJrUGLR1sjUtA'
         ]);
         $result =  $this->sendRequest('POST', 'https://twitter.com/i/api/graphql/ojPdsZsimiJrUGLR1sjUtA/CreateRetweet', $headers, $json);
-        dd($result);
+
     }
+
 
     public function LikePost(Request $request)
     {
+        // $listAccount = $request->selected_accounts;
+        // dd($listAccount);
+
 
         $postID = $request->input('postid');
-        $this->account = Account::find(15);
+
+
+        $this->account = Account::find(26);
+        $rrr = $this->RequestLikePost($this->account,$postID);
+        dd($rrr);
+
+
         $cookies = $this->account->cookies;
         $headers = [
             'authority' => 'twitter.com',
@@ -165,20 +177,54 @@ class TwitterController extends Controller
         ]);
         return $this->sendRequest('POST', 'https://x.com/i/api/graphql/lI07N6Otwv1PhnEgXILM7A/FavoriteTweet', $headers, $json);
     }
+    
+    public function RequestLikePost($account, $postID)
+    {
+
+
+        $cookies = $account->cookies;
+        $proxy = $account->proxy;
+
+        $client = new Client([
+            'base_uri' => 'https://api.x.com',
+            'timeout'  => 10.0,
+        ]);
+        $jar = $this->loadCookies('gt=1806495768804814934; kdt=Oa3UkeujYSML4uL3ZTteM2ofBzEKxxVM3WM3XO3i; twid="u=1709038236667105280"; att=; ct0=aecaee140d6e8029ecb0b5cc21bc29c4; auth_token=bd995dc4441cd759925731d8b8c2ab9814150d46; ');
+        $headers = [
+            'authority' => 'twitter.com',
+            'method' => 'POST',
+            'path' => '/i/api/graphql/OLVH4dMqf6VyvX-XX30pRw/CreateTweet',
+            'scheme' => 'https',
+            'accept' => '*/*',
+            'accept-encoding' => 'gzip, deflate, br, zstd',
+            'accept-language' => 'en-US,en;q=0.9',
+            'authorization' => 'Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA',
+            'content-length' => '1322',
+            'content-type' => 'application/json',
+            'origin' => 'https://twitter.com',
+            'referer' => 'https://twitter.com/home',
+            'x-csrf-token' => $this->getCookieValue($cookies, 'ct0'),
+            'x-twitter-active-user' => 'yes',
+            'x-twitter-auth-type' => 'OAuth2Session',
+            'x-twitter-client-language' => 'en',
+        ];
+        $body = json_encode([
+            'variables' => [
+                'tweet_id' => $postID
+            ],
+            'queryId' => 'lI07N6Otwv1PhnEgXILM7A'
+        ]);
+
+        return $this->sendRequestBase($client,'POST', 'https://x.com/i/api/graphql/lI07N6Otwv1PhnEgXILM7A/FavoriteTweet', $headers, $body,null,$jar,$proxy);
+
+    }
 
     public function LoginAccount(Request $request)
     {
 
         $output = '';
-
-        // $accountId = $request->input('accounts');
-        $this->account = Account::find(21);
-        // dd($this->account);
-        // $this->unlock();
-        // dd($this->account);
-
+        $this->account = Account::find(27);
         $result = $this->initGuestToken();
-        // dd($result);
         $response = json_decode($result['response'], true);
         if ($result['status'] !== 200) {
             return $response['errors'][0]['message'] ?? 'Error';
@@ -262,22 +308,24 @@ class TwitterController extends Controller
 
         $this->account->cookies = $this->headerCookies;
         $this->account->save();
-        dd($this->jar);
-        dd($result);
+        $cookiesArray = $this->jar->toArray();
+        $cookiesJson = json_encode($cookiesArray);
+        dd($cookiesJson);
 
 
-        $result = $this->UpdateProfile();
-        if ($result['status'] === 200) {
-            if (isset($result['headers']['set-cookie'])) {
-                foreach ($result['headers']['set-cookie'] as $cookie) {
-                    $parts = explode(';', $cookie);
-                    if (strpos($parts[0], 'ct0') !== false) {
-                        $ct0 = str_replace('ct0=', '', $parts[0]);
-                        $this->headerCookies = $this->setCookieValue($this->headerCookies, "ct0", $ct0);
-                    }
-                }
-            }
-        }
+
+        // $result = $this->UpdateProfile();
+        // if ($result['status'] === 200) {
+        //     if (isset($result['headers']['set-cookie'])) {
+        //         foreach ($result['headers']['set-cookie'] as $cookie) {
+        //             $parts = explode(';', $cookie);
+        //             if (strpos($parts[0], 'ct0') !== false) {
+        //                 $ct0 = str_replace('ct0=', '', $parts[0]);
+        //                 $this->headerCookies = $this->setCookieValue($this->headerCookies, "ct0", $ct0);
+        //             }
+        //         }
+        //     }
+        // }
 
 
 
@@ -292,6 +340,50 @@ class TwitterController extends Controller
 
     //Func Unlock
 
+    private function saveCookiesToDatabase(CookieJar $cookieJar)
+    {
+        $cookiesArray = $cookieJar->toArray();
+        $cookiesString = '';
+
+        foreach ($cookiesArray as $cookie) {
+            $cookiesString .= $cookie['Name'] . '=' . $cookie['Value'] . '; ';
+        }
+
+        // Remove the last semicolon and space
+        $cookiesString = rtrim($cookiesString, '; ');
+
+        $this->account->cookies = $cookiesString;
+        $this->account->save();
+    }
+
+    private function loadCookiesFromDatabase()
+    {
+        $cookiesString = 'kdt=Oa3UkeujYSML4uL3ZTteM2ofBzEKxxVM3WM3XO3i; twid="u=1709038236667105280"; att=; ct0=aecaee140d6e8029ecb0b5cc21bc29c4; auth_token=bd995dc4441cd759925731d8b8c2ab9814150d46; ';
+        $cookiesString = rtrim($cookiesString, '; ');
+
+        if ($cookiesString) {
+            $cookiesArray = explode('; ', $cookiesString);
+            // dd($cookiesArray);
+            foreach ($cookiesArray as $cookieString) {
+                list($name, $value) = explode('=', $cookieString, 2);
+                $this->jar->setCookie(new \GuzzleHttp\Cookie\SetCookie(['Name' => $name, 'Value' => $value, 'Domain' => 'twitter.com']));
+            }
+        }
+    }
+
+    private function loadCookies($cookiesString)
+    {
+        $cookieJar = new CookieJar();
+        $cookiesString = rtrim($cookiesString, '; ');
+        if ($cookiesString) {
+            $cookiesArray = explode('; ', $cookiesString);
+            foreach ($cookiesArray as $cookieString) {
+                list($name, $value) = explode('=', $cookieString, 2);
+                $cookieJar->setCookie(new \GuzzleHttp\Cookie\SetCookie(['Name' => $name, 'Value' => $value, 'Domain' => 'twitter.com']));
+            }
+        }
+        return $cookieJar;
+    }
 
     public function Header_Unlock()
     {
@@ -305,7 +397,6 @@ class TwitterController extends Controller
             'Cache-Control' => 'max-age=0',
             'Content-Length' => '818',
             'Content-Type' => 'application/x-www-form-urlencoded',
-            'Cookie' => $this->account->cookies,
             'Origin' => 'https://twitter.com',
             'Referer' => 'https://twitter.com/account/access',
             'Sec-Ch-Ua' => '"Microsoft Edge";v="123", "Not:A-Brand";v="8", "Chromium";v="123"',
@@ -353,7 +444,7 @@ class TwitterController extends Controller
 
         // Lấy captcha token từ QD_Helper
         $captchaToken = $this->getCaptchaKey('CAP-B297817280A9A6B7DA09AE5EF91A8A43', $this->account->proxy);
-        
+
 
         // Payload
         $payload = [
@@ -365,7 +456,7 @@ class TwitterController extends Controller
             'language_code' => 'en'
         ];
 
-        
+
         // Gửi yêu cầu POST
         try {
             $response = $client->post('https://twitter.com/account/access?lang=en', [
@@ -401,13 +492,6 @@ class TwitterController extends Controller
         ];
     }
 
-    private function jsInst()
-    {
-        $response = $this->client->get("https://twitter.com/i/js_inst?c_name=ui_metrics");
-        $jsScript = (string) $response->getBody();
-        preg_match('/return\s*({.*?});/s', $jsScript, $matches);
-        return $matches[1];
-    }
 
 
     private function getAccessPage()
@@ -416,10 +500,9 @@ class TwitterController extends Controller
         $response = $this->client->get($this->url, [
             'headers' => [
                 "User-Agent" => "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:123.0) Gecko/20100101 Firefox/123.0",
-                'cookie' => $this->account->cookies,
             ],
+            'cookie' => $this->jar,
         ]);
-        $this->account->cookies = $response->getHeader('Set-Cookie');
         $this->extractTokensFromAccessHtmlPage((string) $response->getBody());
     }
 
@@ -429,8 +512,8 @@ class TwitterController extends Controller
         $response = $this->client->post('https://twitter.com/account/access?lang=en', [
             'form_params' => $data,
             'headers' => $this->Header_Unlock(),
+            'cookie' => $this->jar
         ]);
-        $this->account->cookies = $response->getHeader('Set-Cookie');
         $this->extractTokensFromAccessHtmlPage((string) $response->getBody());
     }
 
@@ -441,7 +524,6 @@ class TwitterController extends Controller
             "assignment_token" => $tokens["assignment_token"],
             "lang" => "en",
             "flow" => "",
-            "ui_metrics" => $this->jsInst()
         ];
     }
 
@@ -518,15 +600,12 @@ class TwitterController extends Controller
 
     public function unlock()
     {
-
         $this->getAccessPage();
         $this->postDataWithJsInst();
-
         $funCaptchaToken = $this->getCaptchaKey('CAP-B297817280A9A6B7DA09AE5EF91A8A43', $this->account->proxy);
         $this->postDataWithToken($funCaptchaToken);
         $funCaptchaToken = $this->getCaptchaKey('CAP-B297817280A9A6B7DA09AE5EF91A8A43', $this->account->proxy);
         $this->postDataWithToken($funCaptchaToken);
-        echo $funCaptchaToken;
         $this->postDataWithJsInst();
     }
 
@@ -667,6 +746,43 @@ class TwitterController extends Controller
         ]);
 
         return $this->sendRequest('POST', 'https://api.twitter.com/1.1/onboarding/task.json', $this->get_headers(), $requestBody);
+    }
+
+    private function sendRequestBase($client,$method, $url, $headers, $body = null, $param = null,$cookie = null, $proxy)
+    {
+        try {
+            $response = $client->request($method, $url, [
+                'headers' => $headers,
+                'body' => $body,
+                'form_params' => $param,
+                'cookies' => $cookie,
+                'proxy' => [
+                    'http'  => "http://$proxy", // Proxy HTTP
+                    // 'https' => "https://$proxy", // Proxy HTTPS (nếu cần)
+                ],
+            ]);
+
+            $responseBody = $response->getBody()->getContents();
+            return [
+                'status' => $response->getStatusCode(),
+                'response' => $responseBody,
+                'headers' => $response->getHeaders()
+            ];
+        } catch (RequestException $e) {
+            if ($e->hasResponse()) {
+                $responseBody = $e->getResponse()->getBody()->getContents();
+                return [
+                    'status' => $e->getResponse()->getStatusCode(),
+                    'response' => $responseBody,
+                    'headers' => $e->getResponse()->getHeaders()
+                ];
+            }
+            return [
+                'status' => 500,
+                'response' => 'Internal Server Error',
+                'headers' => []
+            ];
+        }
     }
 
     private function sendRequest($method, $url, $headers, $body = null, $param = null)

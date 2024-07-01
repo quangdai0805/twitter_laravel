@@ -60,5 +60,3 @@ Route::get('main', [LoginController::class, 'showMainView'])->name('main');
 Route::post('testt', [LoginController::class, 'testt'])->name('testt');
 Route::get('x_guest_token', [LoginController::class, 'x_guest_token'])->name('x_guest_token');
 Route::get('testProxy', [LoginController::class, 'testProxy'])->name('testProxy');
-
-Route::get('qd', [QdtestController::class, 'qd'])->name('qd');
