@@ -1,73 +1,103 @@
 $(document).ready(function() {
     $('#loginAccount').click(function() {
-        //alert('Please select at least one account.');
-        // var selectedAccounts = [];
-        // $('input[name="accounts[]"]:checked').each(function() {
-        //     selectedAccounts.push($(this).val());
-        // });
-
-        var selectedAccounts = [];
         var checkboxes = document.querySelectorAll('input[name="selected_accounts[]"]:checked');
-
-        for (var checkbox of checkboxes) {
-            selectedAccounts.push(checkbox.value);
-        }
-
-
-        if (selectedAccounts.length === 0) {
-            alert('Please select at least one account.');
-            return;
-        }else{
-            alert(selectedAccounts.length);
-        }
-
-        $.ajax({
-            url: '/LoginAccount',
-            type: 'POST',
-            data: {
-                accounts: selectedAccounts[0],
-                _token: $('meta[name="csrf-token"]').attr('content')
-            },
-            success: function(response) {
-                alert('Request was successful!');
-                console.log(response);
-            },
-            error: function(xhr, status, error) {
-                alert('An error occurred.');
-                console.log(error);
-            }
+        checkboxes.forEach(function(checkbox) {
+            console.log('Sending username: ' + checkbox.value);
+            $.ajax({
+                url: '/LoginAccount',
+                type: 'POST',
+                data: {
+                    accounts: checkbox.value,
+                    _token: $('meta[name="csrf-token"]').attr('content')
+                },
+                success: function(response) {
+                    console.log(response);
+                },
+                error: function(xhr, status, error) {
+                    console.log(error);
+                }
+            });
         });
     });
 
-    $('#followAccount').click(function() {
-        var selectedAccounts = [];
-        let data = document.getElementById('idAccountFollow').value;
+    $('#likePost').click(function() {
 
+        let postid = document.getElementById('idAccountFollow').value;
 
-        if (data === '') {
+        if (postid === '') {
             alert('Dien UID');
             return;
-        }else{
-            //alert(selectedAccounts.length);
         }
-
-        $.ajax({
-            url: '/LikePost',
-            type: 'POST',
-            data: {
-                postid: data,
-                _token: $('meta[name="csrf-token"]').attr('content')
-            },
-            success: function(response) {
-                //alert('Request was successful!');
-                console.log(response);
-            },
-            error: function(xhr, status, error) {
-                //alert('An error occurred.');
-                console.log(error);
-            }
+        var checkboxes = document.querySelectorAll('input[name="selected_accounts[]"]:checked');
+        checkboxes.forEach(function(checkbox) {
+            console.log('Sending username: ' + checkbox.value);
+            $.ajax({
+                url: '/LikePost',
+                type: 'POST',
+                data: {
+                    postid: postid,
+                    accounts: checkbox.value,
+                    _token: $('meta[name="csrf-token"]').attr('content')
+                },
+                success: function(response) {
+                    console.log(response);
+                },
+                error: function(xhr, status, error) {
+                    console.log(error);
+                }
+            });
         });
     });
-    //followAccount
+    $('#commentPost').click(function() {
+
+        let postid = document.getElementById('idAccountFollow').value;
+
+        if (postid === '') {
+            alert('Dien UID');
+            return;
+        }
+        var checkboxes = document.querySelectorAll('input[name="selected_accounts[]"]:checked');
+        checkboxes.forEach(function(checkbox) {
+            console.log('Sending username: ' + checkbox.value);
+            $.ajax({
+                url: '/comment-post',
+                type: 'POST',
+                data: {
+                    postid: postid,
+                    accounts: checkbox.value,
+                    _token: $('meta[name="csrf-token"]').attr('content')
+                },
+                success: function(response) {
+                    console.log(response);
+                },
+                error: function(xhr, status, error) {
+                    console.log(error);
+                }
+            });
+        });
+    });
+
+    $('#checkip').click(function() {
+
+        
+        var checkboxes = document.querySelectorAll('input[name="selected_accounts[]"]:checked');
+        checkboxes.forEach(function(checkbox) {
+            console.log('Sending username: ' + checkbox.value);
+            $.ajax({
+                url: '/CheckProxy',
+                type: 'GET',
+                data: {
+                    _token: $('meta[name="csrf-token"]').attr('content')
+                },
+                success: function(response) {
+                    console.log(response);
+                },
+                error: function(xhr, status, error) {
+                    console.log(error);
+                }
+            });
+        });
+    });
+
 });
 

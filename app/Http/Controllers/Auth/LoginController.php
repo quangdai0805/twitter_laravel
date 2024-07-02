@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use GuzzleHttp\Client;
 use Flasher\Prime\FlasherInterface;
+use App\Models\User;
+
 class LoginController extends Controller
 {
     //
@@ -94,6 +96,7 @@ class LoginController extends Controller
         }
         return view('login');
     }
+    
     public function login(Request $request, FlasherInterface $flasher)
     {
         // Validate the form data
@@ -104,17 +107,45 @@ class LoginController extends Controller
 
         // Attempt to authenticate the user
         if (Auth::attempt($credentials)) {
-            // Authentication passed, get the authenticated user
             $user = Auth::user();
-            
-            // Redirect to main with success message and username
+            toastr()->success('Đăng nhập thành công!');
             return redirect()->route('main')->with([
-                'success' => 'Đăng nhập thành công!',
-                'username' => $user->name // Assuming you have a 'name' field in users table
+                'username' => $user->name
             ]);
         } else {
-            // Authentication failed, redirect back to login form
-            return redirect()->route('login')->with('error', 'Đăng nhập thất bại!');
+            toastr()->error('Đăng nhập thất bại!');
+            return redirect()->route('login');
+        }
+    }
+
+    public function register(Request $request, FlasherInterface $flasher)
+    {
+        
+        // Validate the form data
+        $credentials = $request->validate([
+            // 'name' => 'required',
+            'email' => 'required|email',
+            'password' => 'required',
+        ]);
+
+        // dd($credentials);
+        if (Auth::attempt($credentials)) {
+            $user = Auth::user();
+            // toastr()->error('Tai khoan da ton tai');
+             dd($user);
+            // return redirect()->route('register')->with([
+            //     'username' => $user->name
+            // ]);
+        } else {
+
+            $name = $request->input('name');
+            User::factory()->create([
+                'name' => $request->input('name'),
+                'email' => $request->input('email'),
+                'password' => $request->input('password')
+            ]);
+            toastr()->success('Đăng ky thanh cong!');
+            return redirect()->route('login');
         }
     }
 

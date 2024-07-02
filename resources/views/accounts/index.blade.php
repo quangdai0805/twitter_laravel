@@ -128,6 +128,7 @@
                                             </thead>
                                             <tbody>
                                                 @foreach($accounts as $account)
+
                                                     <tr>
                                                         <td><input type="checkbox" name="selected_accounts[]" value="{{ $account->id }}"></td>
                                                         <td>{{ $account->id }}</td>
@@ -135,7 +136,14 @@
                                                         <td>{{ $account->proxy }}</td>
                                                         <td>{{ $account->follower }}</td>
                                                         <td>{{ $account->following }}</td>
-                                                        <td>{{ $account->status }}</td>
+                                                        {{-- <td>{{ $account->status }}</td> --}}
+                                                        <td>
+                                                            @if ($account->cookies)
+                                                                Logined
+                                                            @else
+                                                                
+                                                            @endif
+                                                        </td>
                                                         <td>
                                                             <!-- Add actions like edit, delete if needed -->
                                                         </td>
@@ -167,20 +175,33 @@
                                                 <button id= "loginAccount" type="button" class="btn btn-sm btn-primary"> Login</button> 
                                             </li>
                                             <li>
-                                                <div class="input-group col-sm-6">
+                                                <div class="input-group col-sm-12">
                                                     <span class="input-group-btn">
-                                                        <button id= "followAccount" type="button" class="btn btn-sm btn-primary"> Follow</button> 
+                                                        <button id= "likePost" type="button" class="btn btn-sm btn-primary"> Like Post </button> 
+                                                        <button id= "tweetPost" type="button" class="btn btn-sm btn-primary"> Tweet </button> 
+                                                        <button id= "commentPost" type="button" class="btn btn-sm btn-primary"> Comment </button> 
+                                                      
                                                     </span>
 
-                                                    <input id='idAccountFollow' type="text" placeholder="UID" class="input-sm form-control">
+                                                    <span>
+                                                        <input id='idAccountFollow' type="text" placeholder="UID" class="input-sm form-control">
+                                                    </span>
+                                                    
                                                 </div>
-                                        
+                                                <div class="input-group col-sm-12">
+                                                    
+                                                    <span>
+                                                        <textarea id="comments" placeholder="Comments" rows="3" class="form-control form-textarea"></textarea>
+                                                    </span>
+                                                    
+                                                </div>
     
                                             </li>
                                             <li>
                                                 <div class="input-group col-sm-6">
                                                     <span class="input-group-btn">
-                                                        <button type="button" class="btn btn-sm btn-primary"> Tweet</button> 
+                                                        <button  type="button" class="btn btn-sm btn-primary"> Follow</button> 
+                                                        {{-- <button id='checkip' type="button" class="btn btn-sm btn-primary"> Check IP</button>  --}}
                                                     </span>
 
                                                     <input type="text" placeholder="UID" class="input-sm form-control">
@@ -199,6 +220,18 @@
                                 <label class="lable_item lable_live_count"> Total 
                                     <span class="live_count" id="live_count">0</span>
                                     <button type="submit" class="btn btn-sm btn-primary">Add</button>
+                                    @if (session('error'))
+                                        <div class="alert alert-danger">
+                                            {{-- {{ session('error') }} --}}
+                                        </div>
+                                    @endif
+
+                                    @if (session('success'))
+                                        <div class="alert alert-success">
+                                            {{ session('success') }}
+                                        </div>
+                                    @endif
+
                                 </label>
                                 <textarea name="accounts" id="accounts" rows="14" class="form-control form-textarea"></textarea>
                             </div>
@@ -284,7 +317,7 @@
                 }
 
                 $.ajax({
-                    url: '{{ route("login.selected.accounts") }}',
+                    url: '{{ route("LoginAccount") }}',
                     type: 'POST',
                     data: {
                         accounts: selectedAccounts,

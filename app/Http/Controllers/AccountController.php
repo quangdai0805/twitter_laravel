@@ -54,6 +54,9 @@ class AccountController extends Controller
         $request->validate([
             'accounts' => 'required|string',
         ]);
+
+        $duplicateUsernames = [];
+
         $user = Auth::user();
         $lines = explode("\n", $request->input('accounts'));
         foreach ($lines as $line) {
@@ -64,6 +67,11 @@ class AccountController extends Controller
                 $password = $parts[1];
                 $twofa = $parts[2];
                 $proxy = $parts[3];
+                if ($user->accounts()->where('username', $username)->exists()) {
+                    $duplicateUsernames[] = $line;
+                    continue; // Skip creating this account
+                }
+
                 Account::create([
                     'user_id' => $user->id,
                     'username' => $username,
@@ -73,7 +81,18 @@ class AccountController extends Controller
                 ]);
             }
         }
-        return redirect()->back()->with('success', 'Accounts created successfully!');
+
+        // dd($duplicateUsernames);
+
+        if (!empty($duplicateUsernames)) {
+            toastr()->error( 'Duplicate usernames found: ' . implode(', ', $duplicateUsernames));
+            //dd($duplicateUsernames);
+            return redirect()->back()->with('duplicate', $duplicateUsernames);
+        }
+    
+        toastr()->success('Them Account Thanh Cong');
+        return redirect()->back();
+
     }
 
     public function show(Account $account)

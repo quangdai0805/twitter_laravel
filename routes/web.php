@@ -10,6 +10,10 @@ use App\Http\Controllers\UnlockController;
 Route::get('/', function () {
     return view('main');
 });
+Route::get('/register', function () {
+    return view('register');
+});
+
 Route::get('/test', function () {
     return view('layout');
 });
@@ -28,6 +32,7 @@ Route::get('/unlock-account', [UnlockController::class, 'unlockAccount']);
 // Route::post('/login', 'LoginController@login');
 Route::get('login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('login', [LoginController::class, 'login']);
+Route::post('registers', [LoginController::class, 'register'])->name('registers');;
 
 Route::get('logout', [LoginController::class, 'logout'])->name('logout');
 
@@ -49,11 +54,12 @@ Route::delete('deleteSelected', [AccountController::class, 'deleteSelected'])->n
 //Route::post('test', [LoginController::class, 'showMainView'])->name('test');;
 // Route::post('process-number', [LoginController::class, 'showMainView']);
 // Route::get('process-number', [LoginController::class, 'processNumber']);
-Route::post('login-selected-accounts', [TwitterController::class, 'loginSelectedAccounts'])->name('login.selected.accounts');
-Route::get('LoginAccount', [TwitterController::class, 'LoginAccount'])->name('LoginAccount');
+Route::post('login-selected-accounts', [TwitterController::class, 'LoginAccount'])->name('login.selected.accounts');
+Route::post('LoginAccount', [TwitterController::class, 'LoginAccount'])->name('LoginAccount');
 
 Route::get('CheckProxy', [TwitterController::class, 'CheckProxy'])->name('CheckProxy');
 Route::post('LikePost', [TwitterController::class, 'LikePost'])->name('LikePost');
+Route::post('comment-post', [TwitterController::class, 'CommentPost'])->name('comment-post');
 Route::get('CreateRetweet', [TwitterController::class, 'CreateRetweet'])->name('CreateRetweet');
 
 Route::get('main', [LoginController::class, 'showMainView'])->name('main');
