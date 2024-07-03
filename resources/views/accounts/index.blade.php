@@ -30,7 +30,7 @@
             <div class="navbar-collapse collapse" id="navbar">
                 <ul class="nav navbar-nav">
                     <li class="active">
-                        <a aria-expanded="false" role="button" href="layouts.html"> Back to main Layout page</a>
+                        <a aria-expanded="false" role="button" href=""> Back to main Layout page</a>
                     </li>
                     <li class="dropdown">
                         <a aria-expanded="false" role="button" href="#" class="dropdown-toggle" data-toggle="dropdown"> Menu item <span class="caret"></span></a>
@@ -71,11 +71,13 @@
 
                 </ul>
                 <ul class="nav navbar-top-links navbar-right">
-                    <li>
+                    <li><a href="{{ route('logout') }}"><i class="fa fa-sign-out"></i>Logout</a></li>
+                    <!-- <li>
                         <a href="login.html">
                             <i class="fa fa-sign-out"></i> Log out
+                            
                         </a>
-                    </li>
+                    </li> -->
                 </ul>
             </div>
         </nav>
@@ -220,7 +222,7 @@
                                 <label class="lable_item lable_live_count"> Total 
                                     <span class="live_count" id="live_count">0</span>
                                     <button type="submit" class="btn btn-sm btn-primary">Add</button>
-                                    @if (session('error'))
+                                    <!-- @if (session('error'))
                                         <div class="alert alert-danger">
                                             {{-- {{ session('error') }} --}}
                                         </div>
@@ -230,7 +232,7 @@
                                         <div class="alert alert-success">
                                             {{ session('success') }}
                                         </div>
-                                    @endif
+                                    @endif -->
 
                                 </label>
                                 <textarea name="accounts" id="accounts" rows="14" class="form-control form-textarea"></textarea>

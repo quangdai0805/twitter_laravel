@@ -12,7 +12,7 @@ Route::get('/', function () {
 });
 Route::get('/register', function () {
     return view('register');
-});
+})->name('register');;
 
 Route::get('/test', function () {
     return view('layout');

@@ -39,11 +39,10 @@
                 <div class="form-group">
                     <input type="password" name="password" class="form-control" placeholder="Password" required="">
                 </div>
-                <button type="submit" class="btn btn-primary block full-width m-b">Login</button>
+                <button type="submit" class="btn btn-primary block full-width m-b">Register</button>
 
-                <a href="#"><small>Forgot password?</small></a>
-                <p class="text-muted text-center"><small>Do not have an account?</small></p>
-                <a class="btn btn-sm btn-white btn-block" href="register.html">Create an account</a>
+
+                <a class="btn btn-sm btn-white btn-block" href="{{ route('login') }}">Login account</a>
             </form>
             
             <!-- <form method="POST" class="m-t" role="form" action="{{ route('registers') }}">

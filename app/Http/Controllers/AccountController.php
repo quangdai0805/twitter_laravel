@@ -45,8 +45,7 @@ class AccountController extends Controller
 
     public function create()
     {
-        //
-        // return view('accounts.create');
+
     }
 
     public function store(Request $request)
@@ -142,9 +141,10 @@ class AccountController extends Controller
             'selected_accounts.*' => 'exists:accounts,id',
         ]);
 
+        // dd($request);
         Account::whereIn('id', $request->selected_accounts)->delete();
-
-        return redirect()->back()->with('success', 'Selected accounts deleted successfully!');
+        toastr()->success('Da xoa thanh cong');
+        return redirect()->back();
     }
     
 }

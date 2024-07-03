@@ -7,6 +7,10 @@ use Illuminate\Support\Facades\Auth;
 use GuzzleHttp\Client;
 use Flasher\Prime\FlasherInterface;
 use App\Models\User;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
 
 class LoginController extends Controller
 {
@@ -128,24 +132,31 @@ class LoginController extends Controller
             'password' => 'required',
         ]);
 
-        // dd($credentials);
-        if (Auth::attempt($credentials)) {
-            $user = Auth::user();
-            // toastr()->error('Tai khoan da ton tai');
-             dd($user);
-            // return redirect()->route('register')->with([
-            //     'username' => $user->name
-            // ]);
-        } else {
 
-            $name = $request->input('name');
+        $user = User::where('email', $credentials)->first();
+
+        if (!$user) {
             User::factory()->create([
                 'name' => $request->input('name'),
                 'email' => $request->input('email'),
                 'password' => $request->input('password')
             ]);
-            toastr()->success('Đăng ky thanh cong!');
-            return redirect()->route('login');
+            toastr()->success('Tao tai khoan thanh cong!');
+            
+            if (Auth::attempt($credentials)) {
+                $user = Auth::user();
+                toastr()->success('Đăng nhập thành công!');
+                return redirect()->route('main')->with([
+                    'username' => $user->name
+                ]);
+            } else {
+                toastr()->error('Đăng nhập thất bại!');
+                return redirect()->route('login');
+            }
+            return redirect()->back();
+        } else {
+            toastr()->error('User đã tồn tại.');
+            return redirect()->back();
         }
     }
 

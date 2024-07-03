@@ -1,6 +1,6 @@
 let guestToken = '';
 let requestCount = 0;
-const requestsPerTokenChange = 3;
+const requestsPerTokenChange = 50;
 
 $(document).ready(function() {
     const csrfToken = $('meta[name="csrf-token"]').attr('content');
