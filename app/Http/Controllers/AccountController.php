@@ -28,9 +28,7 @@ class AccountController extends Controller
 
     public function index()
     {
-
         // $user = User::findOrFail($userId);
-
         $user = Auth::user();
         if($user == null){
             return "Bạn cần đăng nhập để sử dụng chức năng này!";
@@ -38,9 +36,6 @@ class AccountController extends Controller
             $accounts = $user->accounts; 
             return view('accounts.index', compact('accounts'));
         }
-
-
-       
     }
 
     public function create()

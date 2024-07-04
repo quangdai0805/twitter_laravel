@@ -136,6 +136,8 @@ class TwitterController extends Controller
     public function CreateRetweet(Request $request)
     {
 
+        $accountID = $request->input('account_id');   
+        dd($accountID);
         $test = $this->doesCookieExist("kdt",'gt=1807967887992541447; kdt=ToIBVudIkHZqEqNRgDKGLgNoMbDduzwaUKPOAaO1; att=; twid="u=1709000880245399552"; ct0=b18ee02642492cadea5d055755bd191f; auth_token=a5b31d7ab8a2f501ef5937c51a5b03d1839a98b4;	');
         
         dd($test);
@@ -418,7 +420,7 @@ class TwitterController extends Controller
 
     private function loadCookiesFromDatabase()
     {
-        $cookiesString = 'kdt=Oa3UkeujYSML4uL3ZTteM2ofBzEKxxVM3WM3XO3i; twid="u=1709038236667105280"; att=; ct0=aecaee140d6e8029ecb0b5cc21bc29c4; auth_token=bd995dc4441cd759925731d8b8c2ab9814150d46; ';
+        $cookiesString = 'gt=1808780819592589366; kdt=TpGwQ1udyIlYkrShJiONEGxLTPeQJ0QndIndZRRA; att=; twid="u=1649500285784723457"; ct0=261918d54ecee8e202cecb0008c61a0a; auth_token=36fa68bdf204a178f08418ac9bce47e2e8a57b48; ';
         $cookiesString = rtrim($cookiesString, '; ');
 
         if ($cookiesString) {
@@ -652,6 +654,10 @@ class TwitterController extends Controller
         $this->postDataWithToken($funCaptchaToken);
         $funCaptchaToken = $this->getCaptchaKey('CAP-B297817280A9A6B7DA09AE5EF91A8A43', $this->account->proxy);
         $this->postDataWithToken($funCaptchaToken);
+
+        
+        
+
         $this->postDataWithJsInst();
     }
 

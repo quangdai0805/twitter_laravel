@@ -60,7 +60,7 @@ Route::post('LoginAccount', [TwitterController::class, 'LoginAccount'])->name('L
 Route::get('CheckProxy', [TwitterController::class, 'CheckProxy'])->name('CheckProxy');
 Route::post('LikePost', [TwitterController::class, 'LikePost'])->name('LikePost');
 Route::post('comment-post', [TwitterController::class, 'CommentPost'])->name('comment-post');
-Route::get('CreateRetweet', [TwitterController::class, 'CreateRetweet'])->name('CreateRetweet');
+Route::get('CreateRetweet', [TwitterController::class, 'CreateRetweet']);
 
 Route::get('main', [LoginController::class, 'showMainView'])->name('main');
 Route::post('testt', [LoginController::class, 'testt'])->name('testt');
