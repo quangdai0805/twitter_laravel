@@ -12,8 +12,6 @@ class Account extends Model
     protected $fillable = [
         'user_id', 'username', 'password','twofa','proxy',
     ];
-
-
     public function user()
     {
         return $this->belongsTo(User::class);

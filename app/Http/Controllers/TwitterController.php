@@ -21,7 +21,7 @@ class TwitterController extends Controller
     private $url = 'https://twitter.com/account/access';
     private $tokens = [];
     public function __construct()
-    {$user->create();
+    {
         $this->jar = new CookieJar();
         $this->client = new Client([
             'base_uri' => 'https://api.x.com',
