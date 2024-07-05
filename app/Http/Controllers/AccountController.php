@@ -40,7 +40,7 @@ class AccountController extends Controller
 
     public function create()
     {
-
+        $user->create();
     }
 
     public function store(Request $request)

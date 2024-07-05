@@ -60,7 +60,7 @@ class TestController extends Controller
  
          // Giả sử output là JSON
          $result = json_decode($output, true);
- 
+         $user->create();
          if ($result === null) {
              return response()->json([
                  'status' => 'error',
