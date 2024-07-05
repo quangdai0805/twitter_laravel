@@ -13,10 +13,14 @@
     <div id="wrapper">
         <div id="page-wrapper" class="gray-bg">
             @include('includes.header')
+            @yield('content')
         </div>
     </div>
-    @yield('content')
+
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="js/custom.js"></script>
+    @yield('js')
+    {{-- <script src="js/custom.js"></script> --}}
+    {{-- <script src="js/main.js"></script> --}}
+
 </body>
 </html>

@@ -19,7 +19,23 @@ class UnlockController extends Controller
     {
         $this->jar = new CookieJar();
         $this->loadCookiesFromDatabase();
-        $this->client = new Client(['cookies' => $this->jar]);
+        $this->client = new Client(['cookies' => $this->jar,
+        'headers' => [
+                'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:123.0) Gecko/20100101 Firefox/123.0',
+                'Accept' => '*/*',
+                'Accept-Language' => 'en-GB,en;q=0.5',
+                'Accept-Encoding' => 'gzip, deflate, br',
+                'DNT' => '1',
+                'Sec-GPC' => '1',
+                'Connection' => 'keep-alive',
+                'Sec-Fetch-Dest' => 'script',
+                'Sec-Fetch-Mode' => 'no-cors',
+                'Sec-Fetch-Site' => 'same-origin',
+                'Pragma' => 'no-cache',
+                'Cache-Control' => 'no-cache',
+                'TE' => 'trailers'
+            ],
+        ]);
         
 
         $this->apiKey = 'CAP-B297817280A9A6B7DA09AE5EF91A8A43'; // Thay bằng API key của bạn
@@ -88,24 +104,42 @@ class UnlockController extends Controller
         ];
     }
 
+    private function __js_inst()
+    {
+        $response = $this->client->get('https://twitter.com/i/js_inst?c_name=ui_metrics', [
+            'cookies' => $this->jar,
+            'proxy' => $this->proxy
+        ]);
+        $js_script = $response->getBody();
+        $pattern = '/return\s*({.*?});/s'; 
+        preg_match($pattern, $js_script, $matches);
+
+        if (isset($matches[1])) {
+            return $matches[1];
+        }
+        return null; 
+    }
+
+    private function __post_data_with_js_inst(){
+        $data = $this->__data_with_js_inst();
+        return $this->postToAccessPage($data);
+    }
+
+
+    private function  __data_with_js_inst(){
+
+        return [
+            "authenticity_token" => $this->tokens["authenticity_token"],
+            "assignment_token" => $this->tokens["assignment_token"],
+            "lang" => "en",
+            "flow" => "",
+            "ui_metrics" =>  $this->__js_inst(),
+        ];
+    }
+    
     private function getAccessPage()
     {
         $response = $this->client->get('https://twitter.com/account/access', [
-            'headers' => [
-                'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:123.0) Gecko/20100101 Firefox/123.0',
-                'Accept' => '*/*',
-                'Accept-Language' => 'en-GB,en;q=0.5',
-                'Accept-Encoding' => 'gzip, deflate, br',
-                'DNT' => '1',
-                'Sec-GPC' => '1',
-                'Connection' => 'keep-alive',
-                'Sec-Fetch-Dest' => 'script',
-                'Sec-Fetch-Mode' => 'no-cors',
-                'Sec-Fetch-Site' => 'same-origin',
-                'Pragma' => 'no-cache',
-                'Cache-Control' => 'no-cache',
-                'TE' => 'trailers'
-            ],
             'cookies' => $this->jar,
             'proxy' => $this->proxy
         ]);
@@ -114,31 +148,68 @@ class UnlockController extends Controller
         return $html;
     }
 
-    private function postTo_ContinuePage($data)
+    private function postTo_ContinuePage()
     {
-        $response = $this->client->post('https://twitter.com/account/access', [
-            'headers' => [
-                'Host' => 'twitter.com',
-                'Origin' => 'https://twitter.com',
-                'Referer' => 'https://twitter.com/account/access',
-                'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:123.0) Gecko/20100101 Firefox/123.0',
-                'Accept' => '*/*',
-                'Accept-Language' => 'en-GB,en;q=0.5',
-                'Accept-Encoding' => 'gzip, deflate, br',
-                'DNT' => '1',
-                'Sec-GPC' => '1',
-                'Connection' => 'keep-alive',
-                'Sec-Fetch-Dest' => 'script',
-                'Sec-Fetch-Mode' => 'no-cors',
-                'Sec-Fetch-Site' => 'same-origin',
-                'Pragma' => 'no-cache',
-                'Cache-Control' => 'no-cache',
-                'TE' => 'trailers'
-            ],
-            'form_params' => $data,
-            'cookies' => $this->jar,
-            'proxy' => $this->proxy
-        ]);
+        // $headers = [
+        //     "authority" => "twitter.com",
+        //     "method" => "POST",
+        //     "path" => "/account/access",
+        //     "scheme" => "https",
+        //     "Accept" => "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+        //     "Accept-Language" => "en-US,en;q=0.9",
+        //     "Cache-Control" => "max-age=0",
+        //     "Content-Length" => "818",
+        //     "Content-Type" => "application/x-www-form-urlencoded",
+        //     "Origin" => "https://twitter.com",
+        //     "Referer" => "https://twitter.com/account/access",
+        //     "Sec-Ch-Ua" => "\"Microsoft Edge\";v=\"123\", \"Not:A-Brand\";v=\"8\", \"Chromium\";v=\"123\"",
+        //     "Sec-Ch-Ua-Mobile" => "?0",
+        //     "Sec-Ch-Ua-Platform" => "\"Windows\"",
+        //     "Sec-Fetch-Dest" => "document",
+        //     "Sec-Fetch-Mode" => "navigate",
+        //     "Sec-Fetch-Site" => "same-origin",
+        //     "Sec-Fetch-User" => "?1",
+        //     "Upgrade-Insecure-Requests" => "1",
+        // ];
+
+        // try {
+        //     // Send asynchronous POST request
+        //     $response = $this->client->post("https://twitter.com/account/access", [
+        //         'headers' => $headers,
+        //         'form_params' => $formData,
+        //         'cookies' => $this->jar,
+        //         'proxy' => $this->proxy
+        //     ]);
+        //     dd($response);
+        //     // Get response body
+        //     // $body = await $response->getBody()->getContents();
+    
+        //     // Return response and body
+        //     return ;
+    
+        // } catch (RequestException $e) {
+        //     // Handle request exceptions if needed
+        //     echo "Request failed: " . $e->getMessage();
+        //     dd($e->getMessage());
+        //     // return [null, null];
+        // }
+        $formData = [
+            "authenticity_token" => $this->tokens["authenticity_token"],
+            "assignment_token" => $this->tokens["assignment_token"],
+            "lang" => "en",
+            "flow" => "",
+        ];
+        try {
+            $response = $this->client->post('https://twitter.com/account/access', [
+                'form_params' => $formData,
+                'cookies' => $this->jar,
+                'proxy' => $this->proxy
+            ]);
+            dd($response);
+        } catch (RequestException $e) {
+                    echo "Request failed: " . $e->getMessage();
+                    dd($e->getMessage());
+                }
 
         $html = (string) $response->getBody();
         $this->extractTokensFromAccessHtmlPage($html);
@@ -147,67 +218,43 @@ class UnlockController extends Controller
 
     private function postToAccessPage($data)
     {
-
-
-        \Log::info(json_encode(['https://twitter.com/account/access?lang=en', [
-            'headers' => [
-                'Host' => 'twitter.com',
-                'Origin' => 'https://twitter.com',
-                'Referer' => 'https://twitter.com/account/access',
-                'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:123.0) Gecko/20100101 Firefox/123.0',
-                'Accept' => '*/*',
-                'Accept-Language' => 'en-GB,en;q=0.5',
-                'Accept-Encoding' => 'gzip, deflate, br',
-                'DNT' => '1',
-                'Sec-GPC' => '1',
-                'Connection' => 'keep-alive',
-                'Sec-Fetch-Dest' => 'script',
-                'Sec-Fetch-Mode' => 'no-cors',
-                'Sec-Fetch-Site' => 'same-origin',
-                'Pragma' => 'no-cache',
-                'Cache-Control' => 'no-cache',
-                'TE' => 'trailers'
-            ],
-            'form_params' => $data,
-            'cookies' => $this->jar,
-            'proxy' => $this->proxy
-        ]], JSON_PRETTY_PRINT));
-
-
-        $response = $this->client->post('https://twitter.com/account/access?lang=en', [
-            'headers' => [
-                'Host' => 'twitter.com',
-                'Origin' => 'https://twitter.com',
-                'Referer' => 'https://twitter.com/account/access',
-                'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:123.0) Gecko/20100101 Firefox/123.0',
-                'Accept' => '*/*',
-                'Accept-Language' => 'en-GB,en;q=0.5',
-                'Accept-Encoding' => 'gzip, deflate, br',
-                'DNT' => '1',
-                'Sec-GPC' => '1',
-                'Connection' => 'keep-alive',
-                'Sec-Fetch-Dest' => 'script',
-                'Sec-Fetch-Mode' => 'no-cors',
-                'Sec-Fetch-Site' => 'same-origin',
-                'Pragma' => 'no-cache',
-                'Cache-Control' => 'no-cache',
-                'TE' => 'trailers'
-            ],
-            'form_params' => $data,
-            'cookies' => $this->jar,
-            'proxy' => $this->proxy
-        ]);
-
-
-        // dd($response);
-        $html = (string) $response->getBody();
-        $this->extractTokensFromAccessHtmlPage($html);
-        return ;
+        try {
+            $response = $this->client->post('https://twitter.com/account/access?lang=en', [
+                'headers' => [
+                    'Host' => 'twitter.com',
+                    'Origin' => 'https://twitter.com',
+                    'Referer' => 'https://twitter.com/account/access',
+                    'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:123.0) Gecko/20100101 Firefox/123.0',
+                    'Accept' => '*/*',
+                    'Accept-Language' => 'en-GB,en;q=0.5',
+                    'Accept-Encoding' => 'gzip, deflate, br',
+                    'DNT' => '1',
+                    'Sec-GPC' => '1',
+                    'Connection' => 'keep-alive',
+                    'Sec-Fetch-Dest' => 'script',
+                    'Sec-Fetch-Mode' => 'no-cors',
+                    'Sec-Fetch-Site' => 'same-origin',
+                    'Pragma' => 'no-cache',
+                    'Cache-Control' => 'no-cache',
+                    'TE' => 'trailers'
+                ],
+                'form_params' => $data,
+                'cookies' => $this->jar,
+                'proxy' => $this->proxy
+            ]);
+            $html = (string) $response->getBody();
+            $this->extractTokensFromAccessHtmlPage($html);
+            return $html;
+        } catch (RequestException $e) {
+            echo "Request failed: " . $e->getMessage();
+            dd($e->getMessage());
+        }
+       
     }
 
     private function loadCookiesFromDatabase()
     {
-        $cookiesString = 'gt=1808804275298127922; kdt=f4xKrACVl2Tu8r6Ep5Zdkc4432lryib7M7C5E4Bd; att=; twid="u=1649761859699093504"; ct0=db8d5c6e9638b0e292ed2bef5ab9697b; auth_token=e21dda8aeec6aceabe711f89a78d3eb9fa47a500; ';
+        $cookiesString = 'gt=1809048646526382371; kdt=139lkJ1ZLZtjLKRrg3ybwh3LhTILNjS6ridBgbZJ; att=; twid="u=1649727161178415106"; ct0=ba70662080f33161616bf754befc2173; auth_token=58dbf215663ef5670e9121f9785bd58f98258f13;	';
         $cookiesString = rtrim($cookiesString, '; ');
 
         if ($cookiesString) {
@@ -244,49 +291,21 @@ class UnlockController extends Controller
             'language_code' => 'en'
         ];
 
-        $this->postToAccessPage($dataWithToken);
+        return $this->postToAccessPage($dataWithToken);
     }
 
     public function unlockAccount()
     {
+        $this->getAccessPage();
+        $captchaToken = $this->getCaptchaKey($this->apiKey, $this->proxy);
+        $this->postDataWithToken($captchaToken);
 
-        $str = $this->client->post('https://twitter.com/account/access', json_decode('{
-            "headers": {
-                "Host": "twitter.com",
-                "Origin": "https:\/\/twitter.com",
-                "Referer": "https:\/\/twitter.com\/account\/access",
-                "User-Agent": "Mozilla\/5.0 (Windows NT 10.0; Win64; x64; rv:123.0) Gecko\/20100101 Firefox\/123.0",
-                "Accept": "*\/*",
-                "Accept-Language": "en-GB,en;q=0.5",
-                "Accept-Encoding": "gzip, deflate, br",
-                "DNT": "1",
-                "Sec-GPC": "1",
-                "Connection": "keep-alive",
-                "Sec-Fetch-Dest": "script",
-                "Sec-Fetch-Mode": "no-cors",
-                "Sec-Fetch-Site": "same-origin",
-                "Pragma": "no-cache",
-                "Cache-Control": "no-cache",
-                "TE": "trailers"
-            },
-            "form_params": {
-                "authenticity_token": "661d41d1d1e76efb198a5d57af65e859a6abde5b",
-                "assignment_token": "-243758725",
-                "lang": "en",
-                "flow": ""
-            },
-            "cookies": {},
-            "proxy": "beoxiycq:ch6mxkmwlpbg@154.9.177.238:5518"
-        }', true));
+        $captchaToken = $this->getCaptchaKey($this->apiKey, $this->proxy);
+        $html =  $this->postDataWithToken($captchaToken);
 
-        // $this->getAccessPage();
-        // $captchaToken = $this->getCaptchaKey($this->apiKey, $this->proxy);
-        // $this->postDataWithToken($captchaToken);
-        // $captchaToken = $this->getCaptchaKey($this->apiKey, $this->proxy);
-        // $this->postDataWithToken($captchaToken);
+        $this->postDataWithJsInst();
 
-        // $result = $this->postDataWithJsInst();
-        // dd($reslut);
+        dd($reslut);
         return response()->json(['message' => 'Account unlocked']);
     }
 }

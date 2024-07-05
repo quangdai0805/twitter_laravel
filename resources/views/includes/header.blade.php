@@ -5,9 +5,9 @@
                 <i class="fa fa-reorder"></i>
             </button>
             @if(Auth::check())
-                <a href="#" class="navbar-brand">Welcome, {{ Auth::user()->name }}</a>          
+                <a href="{{ route('main') }}" class="navbar-brand">Welcome, {{ Auth::user()->name }}</a>          
             @else
-                <a href="#" class="navbar-brand">Welcome</a>
+                <a href="{{ route('main') }}" class="navbar-brand">Welcome</a>
             @endif
            
         </div>
@@ -32,6 +32,7 @@
                         <li>Welcome, {{ Auth::user()->name }}</li>
                         <li><a href="{{ route('logout') }}"><i class="fa fa-sign-out"></i>Logout</a></li>
                     @else
+                        <li><a href="{{ route('login') }}"><i class="fa fa-sign-out"></i>Register</a></li>
                         <li><a href="{{ route('login') }}"><i class="fa fa-sign-out"></i>Login</a></li>
                     @endif
             </ul>

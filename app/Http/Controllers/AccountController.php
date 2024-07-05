@@ -33,7 +33,7 @@ class AccountController extends Controller
         if($user == null){
             return "Bạn cần đăng nhập để sử dụng chức năng này!";
         }else{
-            $accounts = $user->accounts; 
+            $accounts = $user->accounts()->paginate(10);
             return view('accounts.index', compact('accounts'));
         }
     }

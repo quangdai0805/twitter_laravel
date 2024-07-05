@@ -1,14 +1,14 @@
 let guestToken = '';
 let requestCount = 0;
-const requestsPerTokenChange = 5; // Số lượng request trước khi đổi token
+const requestsPerTokenChange = 50; // Số lượng request trước khi đổi token
 const parallelRequests = 3; // Số lượng request song song để tăng tốc độ
 
 document.addEventListener('DOMContentLoaded', (event) => {
     const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
     console.log('CSRF Token:', csrfToken);
 
-    document.getElementById('checkButton').addEventListener('click', () => {
-        startCheck(csrfToken);
+    document.getElementById('checkButton').addEventListener('click', async () => {
+        await startCheck(csrfToken);
     });
 });
 
