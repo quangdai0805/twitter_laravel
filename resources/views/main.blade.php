@@ -1,5 +1,3 @@
-{{-- @include('mainTemp') --}}
-
 @extends('layout')
 @section('title')
     Day 

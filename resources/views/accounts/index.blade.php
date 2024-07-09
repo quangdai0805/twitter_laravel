@@ -34,10 +34,65 @@
                     <div class="ibox-content">
                         
                         <div class="table-responsive">
+                            <form action="{{ route('accounts.index') }}" method="GET">
+                                <label for="per_page">Số lượng bản ghi mỗi trang:</label>
+                                <select name="per_page" id="per_page">
+                                    <option value="10" {{ $perPage == 10 ? 'selected' : '' }}>10</option>
+                                    <option value="20" {{ $perPage == 20 ? 'selected' : '' }}>20</option>
+                                    <option value="50" {{ $perPage == 50 ? 'selected' : '' }}>50</option>
+                                    <!-- Thêm các tùy chọn khác tại đây nếu cần -->
+                                </select>
+                                <button type="submit">Áp dụng</button>
+                            </form>
+
                             <form method="POST" action="{{ route('deleteSelected') }}">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="btn btn-danger mb-3">Delete Selected</button>
+                                <button type="button" id="show-cookies" class="btn btn-primary mb-3">Show Cookies</button>
+                            
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th><input type="checkbox" id="select-all"></th>
+                                            <th>#</th>
+                                            <th>User Name</th>
+                                            <th>Proxy</th>
+                                            <th>Follower</th>
+                                            <th>Following</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach($accounts as $account)
+                                        <tr>
+                                            <td><input type="checkbox" name="selected_accounts[]" value="{{ $account->id }}"></td>
+                                            <td>{{ $account->id }}</td>
+                                            <td>{{ $account->username }}</td>
+                                            <td>{{ $account->proxy }}</td>
+                                            <td>{{ $account->follower }}</td>
+                                            <td>{{ $account->following }}</td>
+                                            <td>
+                                            
+                                                    @if ($account->cookies)
+                                                        {{-- <span style="color: green;">{{ $account->cookies }}</span> --}}
+                                                        <span class="cookies-status"  style="color: green;" value="{{ $account->cookies }}">Logged In</span>
+                                                    @else
+                                                        <span style="color: red;">-</span>
+                                                    @endif
+
+                                            </td>
+                                        </tr>
+                                        @endforeach
+                                        {{ $accounts->links() }}
+                                    </tbody>
+                                </table>
+                            </form>
+                            {{-- <form method="POST" action="{{ route('deleteSelected') }}">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-danger mb-3">Delete Selected</button>
+                                <button  >Show Cookies</button>
 
                                 <table class="table table-striped">
                                     <thead>
@@ -62,9 +117,9 @@
                                                 <td>{{ $account->following }}</td>
                                                 <td>
                                                     @if ($account->cookies)
-                                                        Logined
+                                                        <span style="color: green;">Logged In</span>
                                                     @else
-                                                        
+                                                        <span style="color: red;">Not Logged In</span>
                                                     @endif
                                                 </td>
                                             </tr>
@@ -74,7 +129,7 @@
                                     </tbody>
 
                                 </table>
-                            </form>
+                            </form> --}}
 
                            
                         </div>
@@ -174,9 +229,67 @@
         var checkboxes = document.querySelectorAll('input[name="selected_accounts[]"]');
         for (var checkbox of checkboxes) {
             checkbox.checked = this.checked;
+            // console.log(checkbox);
         }
     }
 </script>
+<script>
+    document.getElementById('show-cookies').onclick = function() {
+        // console.log(this.innerText);
+        if(this.innerText == "Show Cookies"){
+            // console.log('bgio tao show cookies ne');
+            this.innerText = "Hide Cookies";
+            // Select all checkboxes with class 'cookies-status'
+            const checkboxes = document.querySelectorAll('span.cookies-status');
+
+            // Loop through each checkbox
+            checkboxes.forEach(function(checkbox) {
+                // Get the value of the checkbox
+
+                var valueAttribute = checkbox.getAttribute('value');
+                // Hiển thị giá trị lấy được trong console
+                // console.log(valueAttribute); // In ra giá trị của thuộc tính "value"
+                // var checkboxValue = checkbox.innerText;
+                // console.log(checkbox.value);
+                // Update the innerText of the checkbox
+                checkbox.innerText = valueAttribute;
+            });
+        
+        }else{
+            // console.log('bgio tao k show nua');
+            this.innerText = "Show Cookies";
+            const checkboxes = document.querySelectorAll('span.cookies-status');
+
+            // Loop through each checkbox
+            checkboxes.forEach(function(checkbox) {
+                // Get the value of the checkbox
+
+                // var valueAttribute = checkbox.getAttribute('value');
+                // Hiển thị giá trị lấy được trong console
+                // console.log(valueAttribute); // In ra giá trị của thuộc tính "value"
+                // var checkboxValue = checkbox.innerText;
+                // console.log(checkbox.value);
+                // Update the innerText of the checkbox
+                checkbox.innerText = 'Logged In';
+            });
+        }
+        
+    }
+</script>
+{{-- <script>
+    document.getElementById('show-cookies').onclick = function() {
+        
+        // var checkboxes = document.querySelectorAll('span[class="cookies-status"]');
+
+        const checkboxes = document.querySelectorAll('span[class="cookies-status"]');
+
+
+        for (var checkbox of checkboxes) {
+            console.log(checkbox);
+        }
+    }
+</script> --}}
+
 <script src="js/login.js"></script>
 <script src="js/jquery-3.1.1.min.js"></script>
 <script src="js/bootstrap.min.js"></script>
