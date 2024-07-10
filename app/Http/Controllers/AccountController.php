@@ -68,7 +68,6 @@ class AccountController extends Controller
         ]);
 
         $duplicateUsernames = [];
-
         $user = Auth::user();
         $lines = explode("\n", $request->input('accounts'));
         foreach ($lines as $line) {

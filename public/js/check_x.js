@@ -18,6 +18,7 @@ $(document).ready(function() {
 
         console.log(usernames);
 
+        
         for (const username of usernames) {
             console.log('Sending username: ' + username);
 

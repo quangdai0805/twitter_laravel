@@ -59,5 +59,5 @@
 </div>
 @endsection 
 @section('js')
-    <script src="js/check_x.js"></script>
+    <script src="js/check_x_2.js"></script>
 @endsection

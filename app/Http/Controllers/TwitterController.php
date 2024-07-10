@@ -29,42 +29,39 @@ class TwitterController extends Controller
         ]);
     }
 
-    // Tang dang dung postman post request toi url http://103.151.238.225:8000/check_x voi data raw  {
-    //     "emails":[
-    //         {"email":"ChapelElro33771"},
-    //         {"email":"MFinamore76769"},
-    //         {"email":"CassioLaki31169"}
-    //     ]
-    // }
-    // toi muon dung php laravel voi GuzzleHttp
 
+    public function test(Request $request){
+        $accounts = $request->input('accounts');
 
-    public function test(){
-        $client = new Client();
-
-        $url = 'http://103.151.238.225:8001/check_x';
-        
         $data = [
             'emails' => [
-                ['email' => 'ChapelElro33771'],
-                ['email' => 'MFinamore76769'],
-                ['email' => 'CassioLaki31169'],
             ]
         ];
+        foreach ($accounts as $email) {
+            $data['emails'][] = ['email' => $email];
+        }
+
+        $client = new Client();
+
+        $url = 'http://103.151.238.225:8000/check_x';
+        
+        // $data = [
+        //     'emails' => [
+        //         ['email' => 'ChapelElro33771'],
+        //         ['email' => 'MFinamore76769'],
+        //         ['email' => 'CassioLaki31169'],
+        //     ]
+        // ];
 
         try {
             $response = $client->post($url, [
                 'json' => $data
             ]);
             $result = json_decode($response->getBody()->getContents(), true);
-
-            dd($result);
-
-            // Xử lý nội dung response theo nhu cầu của bạn
-            return $content;
+            return $result;
 
         } catch (\Exception $e) {
-            // Xử lý khi có lỗi nếu cần thiết
+            
             return $e->getMessage();
         }
     }
