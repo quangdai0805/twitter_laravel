@@ -32,7 +32,7 @@
                         <li><a href="{{ route('user') }}"><i class="fa fa-sign-out"></i>Welcome, {{ Auth::user()->name }}</a></li>
                         <li><a href="{{ route('logout') }}"><i class="fa fa-sign-out"></i>Logout</a></li>
                     @else
-                        <li><a href="{{ route('login') }}"><i class="fa fa-sign-out"></i>Register</a></li>
+                        <li><a href="{{ route('register') }}"><i class="fa fa-sign-out"></i>Register</a></li>
                         <li><a href="{{ route('login') }}"><i class="fa fa-sign-out"></i>Login</a></li>
                     @endif
             </ul>

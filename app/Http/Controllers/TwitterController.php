@@ -35,15 +35,18 @@ class TwitterController extends Controller
 
         $data = [
             'emails' => [
-            ]
+            ],
+            'proxy' => ''
+
         ];
+
         foreach ($accounts as $email) {
             $data['emails'][] = ['email' => $email];
         }
-
+        // dd($data);
         $client = new Client();
 
-        $url = 'http://103.151.238.225:8000/check_x';
+        $url = 'http://103.180.139.212:8000/x_check';
         
         // $data = [
         //     'emails' => [

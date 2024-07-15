@@ -207,10 +207,10 @@
                                 <div class="alert alert-success">
                                     {{ session('success') }}
                                 </div>
-                            @endif -->
+                            @endif -->  
 
                         </label>
-                        <textarea name="accounts" id="accounts" rows="14" class="form-control form-textarea"></textarea>
+                        <textarea placeholder="username  password  2fa  proxy (cách nhau bở dấu tab)" name="accounts" id="accounts" rows="14" class="form-control form-textarea"></textarea>
                     </div>
                 </form>
 

@@ -1,6 +1,6 @@
 @extends('layout')
 @section('title')
-    Day 
+    X+ 
 @endsection
 @section('content')
 <div class="wrapper wrapper-content">
@@ -12,7 +12,7 @@
                         <span class="live_count" id="total_count">0</span>
                         <button class="btn-live-count float-end">Copy</button>
                     </label>
-                    <textarea name="usernames" id="usernames" rows="14" class="form-control form-textarea"></textarea>
+                    <textarea name="usernames" placeholder="username" id="usernames" rows="14" class="form-control form-textarea"></textarea>
                 </div>
 
                 <div class="row">

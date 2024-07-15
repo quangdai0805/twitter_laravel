@@ -6,7 +6,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>INSPINIA | Register</title>
+    <title>X+ | Register</title>
 
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="font-awesome/css/font-awesome.css" rel="stylesheet">
@@ -22,10 +22,10 @@
         <div>
             <div>
 
-                <h1 class="logo-name">IN+</h1>
+                <h1 class="logo-name">X+</h1>
 
             </div>
-            <h3>Register to IN+</h3>
+            <h3>Register to X+</h3>
             <p>Create account to see it in action.</p>
 
             <form method="POST" class="m-t" role="form"  action="{{ route('register') }}">

@@ -6,10 +6,15 @@ use \App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\QdtestController;
 use \App\Http\Controllers\TwitterController;
 use App\Http\Controllers\UnlockController;
+use App\Http\Controllers\ProxyController;
 
 Route::get('/home', function () {
     return view('main');
 });
+
+Route::get('/check-proxy', [ProxyController::class, 'checkProxy']);
+
+
 Route::get('/run-python-script', [TestController::class, 'runPythonScript']);
 Route::get('/unlock-account', [UnlockController::class, 'unlockAccount']);
 
@@ -61,11 +66,6 @@ Route::post('comment-post', [TwitterController::class, 'CommentPost'])->name('co
 Route::get('CreateRetweet', [TwitterController::class, 'CreateRetweet']);
 
 
-Route::post('testt', [LoginController::class, 'testt'])->name('testt');
-Route::get('x_guest_token', [LoginController::class, 'x_guest_token'])->name('x_guest_token');
-
 Route::middleware('throttle:200,1')->group(function () {
     Route::get('check_x', [TwitterController::class, 'check_x'])->name('check_x');
 });
-
-Route::get('testProxy', [LoginController::class, 'testProxy'])->name('testProxy');

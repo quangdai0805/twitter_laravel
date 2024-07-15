@@ -20,8 +20,6 @@ class AccountController extends Controller
     public function someMethod(Account $account)
     {
         $account = Account::findOrFail(1);
-        // dd($account->password);
-        // $user = User::findOrFail($userId);
         $response = $this->twitterController->LoginAccount($account);
         return $response;
     }
@@ -33,28 +31,12 @@ class AccountController extends Controller
         if ($user == null) {
             return "Bạn cần đăng nhập để sử dụng chức năng này!";
         } else {
-            // Lấy giá trị số lượng bản ghi từ request, mặc định là 10 nếu không có giá trị
             $perPage = $request->input('per_page', 10);
-
-            // Lấy danh sách tài khoản với paginate
             $accounts = $user->accounts()->paginate($perPage);
-
             return view('accounts.index', compact('accounts', 'perPage'));
         }
     }
 
-
-    // public function index()
-    // {
-    //     // $user = User::findOrFail($userId);
-    //     $user = Auth::user();
-    //     if($user == null){
-    //         return "Bạn cần đăng nhập để sử dụng chức năng này!";
-    //     }else{
-    //         $accounts = $user->accounts()->paginate(10);
-    //         return view('accounts.index', compact('accounts'));
-    //     }
-    // }
 
     public function create()
     {
