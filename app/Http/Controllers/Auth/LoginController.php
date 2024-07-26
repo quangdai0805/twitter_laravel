@@ -10,11 +10,19 @@ use App\Models\User;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use App\Services\AuthServiceInterface;
+use Illuminate\Support\Facades\Redirect;
 
 
 class LoginController extends Controller
 {
-    
+    protected $authService;
+
+    public function __construct(AuthServiceInterface $authService)
+    {
+        $this->authService = $authService;
+    }
+
     public function user()
     {
         // if(Auth::id()>0){
@@ -63,6 +71,16 @@ class LoginController extends Controller
     public function register(Request $request, FlasherInterface $flasher)
     {
         
+        $data = $request->validate([
+            // 'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|confirmed',
+        ]);
+
+        $this->authService->register($data);
+
+        return Redirect::route('login');
+
         // Validate the form data
         $credentials = $request->validate([
             // 'name' => 'required',
